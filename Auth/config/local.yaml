@@ -1,6 +1,9 @@
 env: "local"
 token_ttl: 1h
 
+usersStorageHost: "usersManageService"
+usersStoragePort: 50051
+
 grpc:
   port: 50051
   timeout: 10h

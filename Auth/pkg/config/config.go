@@ -9,14 +9,16 @@ import (
 )
 
 type Config struct {
-	Env            string        `yaml:"env" env-default:"local"`
-	Grpc           GrpcConfig    `yaml:"grpc"`
-	ExpirationTime time.Duration `yaml:"expiration_time"`
+	Env              string        `yaml:"env" env-default:"local"`
+	TokenTTL         time.Duration `yaml:"token_ttl" env-default:"1h"`
+	UsersStorageHost string        `yaml:"usersStorageHost" env-default:"usersManageService"`
+	UsersStoragePort int           `yaml:"usersStoragePort" env-default:"50051"`
+	Grpc             GrpcConfig    `yaml:"grpc"`
 }
 
 type GrpcConfig struct {
-	Port    int           `yaml:"port"`
-	Timeout time.Duration `yaml:"timeout"`
+	Port    int           `yaml:"port" env-default:"50051"`
+	Timeout time.Duration `yaml:"timeout" env-default:"10h"`
 }
 
 func MustLoad() *Config {
@@ -29,7 +31,7 @@ func MustLoad() *Config {
 }
 
 func MustLoadPath(configPath string) *Config {
-	// check if file exists
+	// Проверка существования файла
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		panic("config file does not exist: " + configPath)
 	}
