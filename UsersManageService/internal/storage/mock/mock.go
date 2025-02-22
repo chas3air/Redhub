@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"usersManageService/internal/domain/models"
 	"usersManageService/internal/storage"
+	"usersManageService/pkg/lib/logger/sl"
 
 	"github.com/google/uuid"
 )
@@ -74,6 +75,16 @@ func (m *MockStorage) GetUserByEmail(ctx context.Context, email string) (models.
 // Insert implements storage.Storage.
 func (m *MockStorage) Insert(ctx context.Context, user models.User) error {
 	const op = "storage.mock.Insert"
+
+	for _, existingUser := range m.users {
+		if existingUser.Id == user.Id {
+			m.log.Warn("User already exists", slog.String("operation", op), slog.Any("additional info", []map[string]interface{}{
+				{"user": user},
+			}), sl.Err(storage.ErrUserExists))
+			return storage.ErrUserExists
+		}
+	}
+
 	m.log.Info("Inserting user", slog.String("operation", op), slog.Any("additional info", []map[string]interface{}{
 		{"user": user},
 	}), slog.String("error", "nil"))
@@ -103,9 +114,13 @@ func (m *MockStorage) Update(ctx context.Context, id uuid.UUID, user models.User
 		}
 	}
 
-	err := fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
-	m.log.Warn("User not found for update", slog.String("operation", op), slog.String("userId", id.String()), slog.String("error", err.Error()))
-	return err
+	m.log.Warn(
+		"User not found for update",
+		slog.String("operation", op),
+		slog.String("userId", id.String()),
+		sl.Err(storage.ErrUserNotFound),
+	)
+	return storage.ErrUserNotFound
 }
 
 // Delete implements storage.Storage.
@@ -123,7 +138,10 @@ func (m *MockStorage) Delete(ctx context.Context, id uuid.UUID) (models.User, er
 		}
 	}
 
-	err := fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
-	m.log.Warn("User not found for deletion", slog.String("operation", op), slog.String("userId", id.String()), slog.String("error", err.Error()))
-	return models.User{}, err
+	m.log.Warn(
+		"User not found for deletion",
+		slog.String("operation", op),
+		slog.String("userId", id.String()),
+		sl.Err(storage.ErrUserNotFound))
+	return models.User{}, storage.ErrUserNotFound
 }

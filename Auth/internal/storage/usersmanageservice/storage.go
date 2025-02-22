@@ -27,7 +27,7 @@ func New(log *slog.Logger, serviceHost string, servicePort int) *UsersManageServ
 	}
 }
 
-// GetUsers implements interfaces.Storage.
+// GetUsers implements interfaces.UsersStorage.
 func (u *UsersManageService) GetUsers(ctx context.Context) ([]models.User, error) {
 	const op = "usersmanageservice.getUsers"
 	log := u.log.With(slog.String("op", op))
@@ -62,7 +62,7 @@ func (u *UsersManageService) GetUsers(ctx context.Context) ([]models.User, error
 	return resUsers, nil
 }
 
-// GetUserById implements interfaces.Storage.
+// GetUserById implements interfaces.UsersStorage.
 func (u *UsersManageService) GetUserById(ctx context.Context, uid uuid.UUID) (models.User, error) {
 	const op = "usersmanageservice.getUserById"
 	log := u.log.With(slog.String("op", op))
@@ -93,7 +93,7 @@ func (u *UsersManageService) GetUserById(ctx context.Context, uid uuid.UUID) (mo
 	return resUser, nil
 }
 
-// GetUserByEmail implements interfaces.Storage.
+// GetUserByEmail implements interfaces.UsersStorage.
 func (u *UsersManageService) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
 	const op = "usersmanageservice.getUserByEmail"
 	log := u.log.With(slog.String("op", op))
@@ -124,7 +124,7 @@ func (u *UsersManageService) GetUserByEmail(ctx context.Context, email string) (
 	return resUser, nil
 }
 
-// Insert implements interfaces.Storage.
+// Insert implements interfaces.UsersStorage.
 func (u *UsersManageService) Insert(ctx context.Context, user models.User) error {
 	const op = "usersmanageservice.insert"
 	log := u.log.With(slog.String("op", op))
@@ -157,7 +157,7 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 	return nil
 }
 
-// Update implements interfaces.Storage.
+// Update implements interfaces.UsersStorage.
 func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user models.User) error {
 	const op = "usersmanageservice.update"
 	log := u.log.With(slog.String("op", op))
@@ -191,7 +191,7 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 	return nil
 }
 
-// Delete implements interfaces.Storage.
+// Delete implements interfaces.UsersStorage.
 func (u *UsersManageService) Delete(ctx context.Context, uid uuid.UUID) (models.User, error) {
 	const op = "usersmanageservice.delete"
 	log := u.log.With(slog.String("op", op))

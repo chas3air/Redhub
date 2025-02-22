@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type Storage interface {
+type UsersStorage interface {
 	GetUsers(ctx context.Context) ([]models.User, error)
 	GetUserById(ctx context.Context, uid uuid.UUID) (models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (models.User, error)
