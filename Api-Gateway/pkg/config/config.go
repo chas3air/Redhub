@@ -6,19 +6,21 @@ import (
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Env              string        `yaml:"env" env-default:"local"`
-	TokenTTL         time.Duration `yaml:"token_ttl" env-default:"1h"`
-	UsersStorageHost string        `yaml:"usersStorageHost" env-default:"usersManageService"`
-	UsersStoragePort int           `yaml:"usersStoragePort" env-default:"50051"`
-	Grpc             GrpcConfig    `yaml:"grpc"`
+	Env              string    `yaml:"env" env-default:"local"`
+	UsersStorageHost string    `yaml:"usersStorageHost" env-default:"user_service"`
+	UsersStoragePort int       `yaml:"usersStoragePort" env-default:"50051"`
+	AuthHost         string    `yaml:"authHost" env-default:"auth"`
+	AuthPort         int       `yaml:"authPost" env-default:"50051"`
+	API              APIConfig `yaml:"api"`
 }
 
-type GrpcConfig struct {
+type APIConfig struct {
 	Port    int           `yaml:"port" env-default:"50051"`
-	Timeout time.Duration `yaml:"timeout" env-default:"10h"`
+	Timeout time.Duration `yaml:"timeout" env-default:"5s"`
 }
 
 func MustLoad() *Config {
@@ -31,15 +33,22 @@ func MustLoad() *Config {
 }
 
 func MustLoadPath(configPath string) *Config {
-	// Проверка существования файла
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		panic("config file does not exist: " + configPath)
 	}
 
 	var cfg Config
 
+	// Используем cleanenv для чтения конфигурации из YAML
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		panic("cannot read config: " + err.Error())
+		// Если cleanenv не справляется, попробуем YAML
+		file, err := os.ReadFile(configPath)
+		if err != nil {
+			panic("cannot read config file: " + err.Error())
+		}
+		if err := yaml.Unmarshal(file, &cfg); err != nil {
+			panic("cannot unmarshal config: " + err.Error())
+		}
 	}
 
 	return &cfg
