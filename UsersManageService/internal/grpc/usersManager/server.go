@@ -31,7 +31,7 @@ func (s *serverAPI) GetUsers(ctx context.Context, req *umv1.GetUsersRequest) (*u
 
 	resp_users := make([]*umv1.User, 0, len(app_users))
 	for _, user := range app_users {
-		profiles_user, err := profiles.UsrToProroUsr(user)
+		profiles_user, err := profiles.UsrToProtoUsr(user)
 		if err != nil {
 			log.Println("error user:", user)
 		}
@@ -52,7 +52,7 @@ func (s *serverAPI) GetUserById(ctx context.Context, req *umv1.GetUserByIdReques
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user no found")
 	}
-	profiled_user, err := profiles.UsrToProroUsr(requested_user)
+	profiled_user, err := profiles.UsrToProtoUsr(requested_user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal")
 	}
@@ -68,7 +68,7 @@ func (s *serverAPI) GetUserByEmail(ctx context.Context, req *umv1.GetUserByEmail
 		return nil, status.Error(codes.InvalidArgument, "invalid argument")
 	}
 
-	profiled_user, err := profiles.UsrToProroUsr(requested_user)
+	profiled_user, err := profiles.UsrToProtoUsr(requested_user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal")
 	}
@@ -121,7 +121,7 @@ func (s *serverAPI) Delete(ctx context.Context, req *umv1.DeleteRequest) (*umv1.
 		return nil, status.Error(codes.InvalidArgument, "invalid arguments")
 	}
 
-	profiled_user, err := profiles.UsrToProroUsr(user)
+	profiled_user, err := profiles.UsrToProtoUsr(user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal")
 	}

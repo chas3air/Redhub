@@ -2,6 +2,7 @@ package mock
 
 import (
 	"context"
+	"time"
 	"usersManageService/internal/domain/models"
 	"usersManageService/internal/storage"
 
@@ -13,8 +14,18 @@ type MockStorage struct {
 }
 
 func New() *MockStorage {
+	generated_id := uuid.New()
 	return &MockStorage{
-		users: make(map[uuid.UUID]models.User),
+		users: map[uuid.UUID]models.User{
+			generated_id: models.User{
+				Id:       generated_id,
+				Email:    "testuser@example.com",
+				Password: "securepassword",
+				Role:     "admin",
+				Nick:     "test_nick",
+				Birthday: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+			},
+		},
 	}
 }
 

@@ -2,6 +2,8 @@ github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/chas3air/protos v0.1.0 h1:B1T081o09jRM9He7itt7oEOyWxomNXIa4s4YK2mpAj0=
 github.com/chas3air/protos v0.1.0/go.mod h1:vDBW+iT4gcFFyPZIuUi5929blqqBL8qI5vBNZxuswNc=
+github.com/chas3air/protos v0.2.2 h1:LaZUtcR12wUGVRy1CVO7TKc62bDdL1AnoURZ4uSxVv4=
+github.com/chas3air/protos v0.2.2/go.mod h1:vDBW+iT4gcFFyPZIuUi5929blqqBL8qI5vBNZxuswNc=
 github.com/fatih/color v1.18.0 h1:S8gINlzdQ840/4pfAwic/ZE0djQEH3wM94VfqLTZcOM=
 github.com/fatih/color v1.18.0/go.mod h1:4FelSpRwEGDpQ12mAdzqdOukCy4u8WUtOY6lkT/6HfU=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
