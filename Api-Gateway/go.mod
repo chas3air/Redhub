@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	github.com/chas3air/protos v0.2.0
+	github.com/chas3air/protos v0.2.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0

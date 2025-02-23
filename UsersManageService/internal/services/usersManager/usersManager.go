@@ -33,6 +33,12 @@ func (um *UserManager) GetUsers(ctx context.Context) ([]models.User, error) {
 	const op = "services.userManager.GetUsers"
 	log := um.log.With(slog.String("operation", op))
 
+	select {
+	case <-ctx.Done():
+		return nil, fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
+
 	users, err := um.storage.GetUsers(ctx)
 	if err != nil {
 		if errors.Is(err, storage_errors.ErrUserNotFound) {
@@ -52,6 +58,12 @@ func (um *UserManager) GetUsers(ctx context.Context) ([]models.User, error) {
 func (um *UserManager) GetUserById(ctx context.Context, uid uuid.UUID) (models.User, error) {
 	const op = "services.userManager.GetUserById"
 	log := um.log.With(slog.String("operation", op))
+
+	select {
+	case <-ctx.Done():
+		return models.User{}, fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
 
 	user, err := um.storage.GetUserById(ctx, uid)
 	if err != nil {
@@ -73,6 +85,12 @@ func (um *UserManager) GetUserByEmail(ctx context.Context, email string) (models
 	const op = "services.userManager.GetUserByEmail"
 	log := um.log.With(slog.String("operation", op))
 
+	select {
+	case <-ctx.Done():
+		return models.User{}, fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
+
 	user, err := um.storage.GetUserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, storage_errors.ErrUserNotFound) {
@@ -92,6 +110,12 @@ func (um *UserManager) GetUserByEmail(ctx context.Context, email string) (models
 func (um *UserManager) Insert(ctx context.Context, user models.User) error {
 	const op = "services.userManager.Insert"
 	log := um.log.With(slog.String("operation", op))
+
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
 
 	err := um.storage.Insert(ctx, user)
 	if err != nil {
@@ -115,6 +139,12 @@ func (um *UserManager) Update(ctx context.Context, uid uuid.UUID, user models.Us
 	const op = "services.userManager.Update"
 	log := um.log.With(slog.String("operation", op))
 
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
+
 	err := um.storage.Update(ctx, uid, user)
 	if err != nil {
 		if errors.Is(err, storage_errors.ErrUserNotFound) {
@@ -136,6 +166,12 @@ func (um *UserManager) Update(ctx context.Context, uid uuid.UUID, user models.Us
 func (um *UserManager) Delete(ctx context.Context, uid uuid.UUID) (models.User, error) {
 	const op = "services.userManager.Delete"
 	log := um.log.With(slog.String("operation", op))
+
+	select {
+	case <-ctx.Done():
+		return models.User{}, fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
 
 	user, err := um.storage.Delete(ctx, uid)
 	if err != nil {

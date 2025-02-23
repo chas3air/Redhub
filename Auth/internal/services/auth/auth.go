@@ -47,6 +47,12 @@ func (a AuthService) Login(ctx context.Context, email string, password string, a
 
 	log.Info("attempt to login")
 
+	select {
+	case <-ctx.Done():
+		return "", fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
+
 	user, err := a.usersstorage.GetUserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
@@ -83,6 +89,12 @@ func (a AuthService) Register(ctx context.Context, user models.User) (err error)
 		slog.String("email", user.Email),
 	)
 
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
+
 	err = a.usersstorage.Insert(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
@@ -104,6 +116,12 @@ func (a AuthService) IsAdmin(ctx context.Context, user_id uuid.UUID) (isAdmin bo
 		slog.String("op", op),
 		slog.String("uid", user_id.String()),
 	)
+
+	select {
+	case <-ctx.Done():
+		return false, fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
 
 	user, err := a.usersstorage.GetUserById(ctx, user_id)
 	if err != nil {

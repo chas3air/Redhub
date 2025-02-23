@@ -24,6 +24,12 @@ func Register(grpc *grpc.Server, userManager usersservice.UsersManager) {
 }
 
 func (s *serverAPI) GetUsers(ctx context.Context, req *umv1.GetUsersRequest) (*umv1.GetUsersResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+	default:
+	}
+
 	app_users, err := s.userManager.GetUsers(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to retrieve app users")
@@ -44,6 +50,12 @@ func (s *serverAPI) GetUsers(ctx context.Context, req *umv1.GetUsersRequest) (*u
 }
 
 func (s *serverAPI) GetUserById(ctx context.Context, req *umv1.GetUserByIdRequest) (*umv1.GetUserByIdResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+	default:
+	}
+
 	parsedUUID, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
@@ -63,6 +75,12 @@ func (s *serverAPI) GetUserById(ctx context.Context, req *umv1.GetUserByIdReques
 }
 
 func (s *serverAPI) GetUserByEmail(ctx context.Context, req *umv1.GetUserByEmailRequest) (*umv1.GetUserByEmailResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+	default:
+	}
+
 	requested_user, err := s.userManager.GetUserByEmail(ctx, req.GetEmail())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid argument")
@@ -79,6 +97,12 @@ func (s *serverAPI) GetUserByEmail(ctx context.Context, req *umv1.GetUserByEmail
 }
 
 func (s *serverAPI) Insert(ctx context.Context, req *umv1.InsertRequest) (*umv1.InsertResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+	default:
+	}
+
 	parsedUser, err := profiles.ProtoUsrToUsr((req.GetUser()))
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid argument")
@@ -92,6 +116,12 @@ func (s *serverAPI) Insert(ctx context.Context, req *umv1.InsertRequest) (*umv1.
 }
 
 func (s *serverAPI) Update(ctx context.Context, req *umv1.UpdateRequest) (*umv1.UpdateResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+	default:
+	}
+
 	parsedUser, err := profiles.ProtoUsrToUsr(req.GetUser())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid argument")
@@ -111,6 +141,12 @@ func (s *serverAPI) Update(ctx context.Context, req *umv1.UpdateRequest) (*umv1.
 }
 
 func (s *serverAPI) Delete(ctx context.Context, req *umv1.DeleteRequest) (*umv1.DeleteResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+	default:
+	}
+
 	parsedUUID, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid id")

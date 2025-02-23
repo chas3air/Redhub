@@ -2,7 +2,7 @@ package grpcauth
 
 import (
 	"auth/internal/domain/interfaces"
-	"auth/internal/domain/profiles"
+	authprofiles "auth/internal/domain/profiles/auth_profiles"
 	authservice "auth/internal/services/auth"
 	"auth/internal/storage"
 	"context"
@@ -25,6 +25,12 @@ func Register(gRPC *grpc.Server, auth interfaces.Auth) {
 }
 
 func (s *serverAPI) Login(ctx context.Context, in *authv1.LoginRequest) (*authv1.LoginResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+	default:
+	}
+
 	email := in.GetEmail()
 	password := in.GetPassword()
 	if email == "" || password == "" {
@@ -54,11 +60,17 @@ func (s *serverAPI) Login(ctx context.Context, in *authv1.LoginRequest) (*authv1
 }
 
 func (s *serverAPI) Register(ctx context.Context, in *authv1.RegisterRequest) (*authv1.RegisterResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+	default:
+	}
+
 	req_user := in.GetUser()
 	if req_user.GetEmail() == "" || req_user.GetPassword() == "" {
 		return nil, status.Error(codes.InvalidArgument, "email and password are required")
 	}
-	user, err := profiles.Auth_ProtoUsrToUsr(req_user)
+	user, err := authprofiles.ProtoUsrToUsr(req_user)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "wrong parametr")
 	}
@@ -75,6 +87,12 @@ func (s *serverAPI) Register(ctx context.Context, in *authv1.RegisterRequest) (*
 }
 
 func (s *serverAPI) IsAdmin(ctx context.Context, in *authv1.IsAdminRequest) (*authv1.IsAdminResponse, error) {
+	select {
+	case <-ctx.Done():
+		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+	default:
+	}
+
 	if in.GetUserId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "user_id is required")
 	}

@@ -2,7 +2,7 @@ package usersmanageservice
 
 import (
 	"auth/internal/domain/models"
-	"auth/internal/domain/profiles"
+	umprofiles "auth/internal/domain/profiles/um_profiles"
 	"auth/pkg/lib/logger/sl"
 	"context"
 	"fmt"
@@ -33,6 +33,12 @@ func (u *UsersManageService) GetUsers(ctx context.Context) ([]models.User, error
 	const op = "usersmanageservice.getUsers"
 	log := u.log.With(slog.String("op", op))
 
+	select {
+	case <-ctx.Done():
+		return nil, fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
+
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", u.ServiceHost, u.ServicePort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -52,7 +58,7 @@ func (u *UsersManageService) GetUsers(ctx context.Context) ([]models.User, error
 
 	var resUsers = make([]models.User, 0, len(res.GetUsers()))
 	for _, pbUser := range res.GetUsers() {
-		user, err := profiles.Ums_ProtoUsrToUsr(pbUser)
+		user, err := umprofiles.ProtoUsrToUsr(pbUser)
 		if err != nil {
 			log.Warn("failed to convert proto user to model user", sl.Err(err))
 			continue
@@ -67,6 +73,12 @@ func (u *UsersManageService) GetUsers(ctx context.Context) ([]models.User, error
 func (u *UsersManageService) GetUserById(ctx context.Context, uid uuid.UUID) (models.User, error) {
 	const op = "usersmanageservice.getUserById"
 	log := u.log.With(slog.String("op", op))
+
+	select {
+	case <-ctx.Done():
+		return models.User{}, fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
 
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", u.ServiceHost, u.ServicePort),
@@ -85,7 +97,7 @@ func (u *UsersManageService) GetUserById(ctx context.Context, uid uuid.UUID) (mo
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	resUser, err := profiles.Ums_ProtoUsrToUsr(res.GetUser())
+	resUser, err := umprofiles.ProtoUsrToUsr(res.GetUser())
 	if err != nil {
 		log.Warn("failed to convert proto user to model user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
@@ -98,6 +110,12 @@ func (u *UsersManageService) GetUserById(ctx context.Context, uid uuid.UUID) (mo
 func (u *UsersManageService) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
 	const op = "usersmanageservice.getUserByEmail"
 	log := u.log.With(slog.String("op", op))
+
+	select {
+	case <-ctx.Done():
+		return models.User{}, fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
 
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", u.ServiceHost, u.ServicePort),
@@ -116,7 +134,7 @@ func (u *UsersManageService) GetUserByEmail(ctx context.Context, email string) (
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	resUser, err := profiles.Ums_ProtoUsrToUsr(res.GetUser())
+	resUser, err := umprofiles.ProtoUsrToUsr(res.GetUser())
 	if err != nil {
 		log.Warn("failed to convert proto user to model user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
@@ -130,6 +148,12 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 	const op = "usersmanageservice.insert"
 	log := u.log.With(slog.String("op", op))
 
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
+
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", u.ServiceHost, u.ServicePort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -141,7 +165,7 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 	defer conn.Close()
 
 	c := umv1.NewUsersManagerClient(conn)
-	userForInsert, err := profiles.Ums_UsrToProtoUsr(user)
+	userForInsert, err := umprofiles.UsrToProtoUsr(user)
 	if err != nil {
 		log.Warn("failed to convert model user to proto user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
@@ -163,6 +187,12 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 	const op = "usersmanageservice.update"
 	log := u.log.With(slog.String("op", op))
 
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
+
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", u.ServiceHost, u.ServicePort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -174,7 +204,7 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 	defer conn.Close()
 
 	c := umv1.NewUsersManagerClient(conn)
-	userForUpdate, err := profiles.Ums_UsrToProtoUsr(user)
+	userForUpdate, err := umprofiles.UsrToProtoUsr(user)
 	if err != nil {
 		log.Warn("failed to convert model user to proto user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
@@ -197,6 +227,12 @@ func (u *UsersManageService) Delete(ctx context.Context, uid uuid.UUID) (models.
 	const op = "usersmanageservice.delete"
 	log := u.log.With(slog.String("op", op))
 
+	select {
+	case <-ctx.Done():
+		return models.User{}, fmt.Errorf("%s: %w", op, context.Canceled)
+	default:
+	}
+
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", u.ServiceHost, u.ServicePort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -216,7 +252,7 @@ func (u *UsersManageService) Delete(ctx context.Context, uid uuid.UUID) (models.
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	resUser, err := profiles.Ums_ProtoUsrToUsr(res.GetUser())
+	resUser, err := umprofiles.ProtoUsrToUsr(res.GetUser())
 	if err != nil {
 		log.Warn("failed to convert proto user to model user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)

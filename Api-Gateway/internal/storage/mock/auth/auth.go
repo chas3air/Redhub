@@ -28,23 +28,15 @@ func (a *MockAuth) Login(ctx context.Context, email string, password string, app
 	return uuid.Nil.String(), storage.ErrUserNotFound
 }
 
-func (a *MockAuth) Register(ctx context.Context, email string, password string) (userID uuid.UUID, err error) {
+func (a *MockAuth) Register(ctx context.Context, user models.User) (err error) {
 	for _, v := range a.users {
-		if v.Email == email && v.Password == password {
-			return uuid.Nil, storage.ErrUserExists
+		if v.Email == user.Email && v.Password == user.Password {
+			return storage.ErrUserExists
 		}
 	}
 
-	generated_id := uuid.New()
-	a.users[generated_id] = models.User{
-		Id:       generated_id,
-		Email:    email,
-		Password: password,
-		Role:     "user",
-		Nick:     "default",
-	}
-
-	return generated_id, nil
+	a.users[user.Id] = user
+	return nil
 }
 
 func (a *MockAuth) IsAdmin(ctx context.Context, userID uuid.UUID) (isAdmin bool, err error) {
