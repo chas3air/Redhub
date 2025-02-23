@@ -14,7 +14,8 @@ type App struct {
 }
 
 func New(log *slog.Logger, tokenTTL time.Duration, port int) *App {
-	usersStorage := usersmanageservice.New(log, "server", 50051)
+	usersStorage := usersmanageservice.New(log, "user_service", 50051)
+	//usersStorage := mockusers.New()
 	appProvider := mockapp.New(log)
 
 	authservice := authservice.New(log, usersStorage, appProvider, tokenTTL)

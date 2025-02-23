@@ -1,9 +1,9 @@
-package mock
+package mockusers
 
 import (
+	"auth/internal/domain/models"
+	"auth/internal/storage"
 	"context"
-	"usersManageService/internal/domain/models"
-	"usersManageService/internal/storage"
 
 	"github.com/google/uuid"
 )

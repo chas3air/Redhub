@@ -10,16 +10,18 @@ import (
 
 type AppProvider struct {
 	log  *slog.Logger
-	apps []models.App
+	apps map[uuid.UUID]models.App
 }
 
 func New(log *slog.Logger) *AppProvider {
-	apps := make([]models.App, 0, 10)
-	apps = append(apps, models.App{
-		Id:     uuid.New(),
+	apps := make(map[uuid.UUID]models.App, 5)
+	generated_id := uuid.New()
+	log.Info("Showing app-id:", slog.String("app_id", generated_id.String()))
+	apps[generated_id] = models.App{
+		Id:     generated_id,
 		Alias:  "Postman",
 		Secret: "secret",
-	})
+	}
 
 	return &AppProvider{
 		log:  log,
@@ -27,15 +29,20 @@ func New(log *slog.Logger) *AppProvider {
 	}
 }
 
-// App implements interfaces.AppProvider.
 func (a *AppProvider) App(ctx context.Context, app_id uuid.UUID) (models.App, error) {
-	panic("unimplemented")
+	return a.apps[app_id], nil
 }
 
 func (a *AppProvider) Insert(ctx context.Context, app models.App) error {
-	panic("uimplemented")
+	a.apps[app.Id] = app
+	return nil
 }
 
 func (a *AppProvider) GetAll(ctx context.Context) ([]models.App, error) {
-	return a.apps, nil
+	apps := make([]models.App, 0, len(a.apps))
+	for _, v := range a.apps {
+		apps = append(apps, v)
+	}
+
+	return apps, nil
 }

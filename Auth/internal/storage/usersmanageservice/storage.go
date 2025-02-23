@@ -3,6 +3,7 @@ package usersmanageservice
 import (
 	"auth/internal/domain/models"
 	"auth/internal/domain/profiles"
+	"auth/pkg/lib/logger/sl"
 	"context"
 	"fmt"
 	"log/slog"
@@ -37,7 +38,7 @@ func (u *UsersManageService) GetUsers(ctx context.Context) ([]models.User, error
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", slog.String("error", err.Error()))
+		log.Error("failed to connect to gRPC server", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -45,7 +46,7 @@ func (u *UsersManageService) GetUsers(ctx context.Context) ([]models.User, error
 	c := umv1.NewUsersManagerClient(conn)
 	res, err := c.GetUsers(ctx, nil)
 	if err != nil {
-		log.Warn("failed to get users", slog.String("error", err.Error()))
+		log.Warn("failed to get users", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -53,7 +54,7 @@ func (u *UsersManageService) GetUsers(ctx context.Context) ([]models.User, error
 	for _, pbUser := range res.GetUsers() {
 		user, err := profiles.ProtoUsrToUsr(pbUser)
 		if err != nil {
-			log.Warn("failed to convert proto user to model user", slog.String("error", err.Error()))
+			log.Warn("failed to convert proto user to model user", sl.Err(err))
 			continue
 		}
 		resUsers = append(resUsers, user)
@@ -72,7 +73,7 @@ func (u *UsersManageService) GetUserById(ctx context.Context, uid uuid.UUID) (mo
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", slog.String("error", err.Error()))
+		log.Error("failed to connect to gRPC server", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -80,13 +81,13 @@ func (u *UsersManageService) GetUserById(ctx context.Context, uid uuid.UUID) (mo
 	c := umv1.NewUsersManagerClient(conn)
 	res, err := c.GetUserById(ctx, &umv1.GetUserByIdRequest{Id: uid.String()})
 	if err != nil {
-		log.Warn("failed to get user by ID", slog.String("error", err.Error()))
+		log.Warn("failed to get user by ID", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	resUser, err := profiles.ProtoUsrToUsr(res.GetUser())
 	if err != nil {
-		log.Warn("failed to convert proto user to model user", slog.String("error", err.Error()))
+		log.Warn("failed to convert proto user to model user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -103,7 +104,7 @@ func (u *UsersManageService) GetUserByEmail(ctx context.Context, email string) (
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", slog.String("error", err.Error()))
+		log.Error("failed to connect to gRPC server", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -111,13 +112,13 @@ func (u *UsersManageService) GetUserByEmail(ctx context.Context, email string) (
 	c := umv1.NewUsersManagerClient(conn)
 	res, err := c.GetUserByEmail(ctx, &umv1.GetUserByEmailRequest{Email: email})
 	if err != nil {
-		log.Warn("failed to get user by email", slog.String("error", err.Error()))
+		log.Warn("failed to get user by email", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	resUser, err := profiles.ProtoUsrToUsr(res.GetUser())
 	if err != nil {
-		log.Warn("failed to convert proto user to model user", slog.String("error", err.Error()))
+		log.Warn("failed to convert proto user to model user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -134,7 +135,7 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", slog.String("error", err.Error()))
+		log.Error("failed to connect to gRPC server", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -142,7 +143,7 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 	c := umv1.NewUsersManagerClient(conn)
 	userForInsert, err := profiles.UsrToProroUsr(user)
 	if err != nil {
-		log.Warn("failed to convert model user to proto user", slog.String("error", err.Error()))
+		log.Warn("failed to convert model user to proto user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -150,7 +151,7 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 		User: userForInsert,
 	})
 	if err != nil {
-		log.Warn("failed to insert user", slog.String("error", err.Error()))
+		log.Warn("failed to insert user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -167,7 +168,7 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", slog.String("error", err.Error()))
+		log.Error("failed to connect to gRPC server", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -175,7 +176,7 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 	c := umv1.NewUsersManagerClient(conn)
 	userForUpdate, err := profiles.UsrToProroUsr(user)
 	if err != nil {
-		log.Warn("failed to convert model user to proto user", slog.String("error", err.Error()))
+		log.Warn("failed to convert model user to proto user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -184,7 +185,7 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 		User: userForUpdate,
 	})
 	if err != nil {
-		log.Warn("failed to update user", slog.String("error", err.Error()))
+		log.Warn("failed to update user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -201,7 +202,7 @@ func (u *UsersManageService) Delete(ctx context.Context, uid uuid.UUID) (models.
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", slog.String("error", err.Error()))
+		log.Error("failed to connect to gRPC server", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -211,13 +212,13 @@ func (u *UsersManageService) Delete(ctx context.Context, uid uuid.UUID) (models.
 		Id: uid.String(),
 	})
 	if err != nil {
-		log.Warn("failed to delete user", slog.String("error", err.Error()))
+		log.Warn("failed to delete user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	resUser, err := profiles.ProtoUsrToUsr(res.GetUser())
 	if err != nil {
-		log.Warn("failed to convert proto user to model user", slog.String("error", err.Error()))
+		log.Warn("failed to convert proto user to model user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 

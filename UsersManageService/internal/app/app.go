@@ -12,7 +12,7 @@ type App struct {
 }
 
 func New(log *slog.Logger, port int) *App {
-	storage := mock.New(log)
+	storage := mock.New()
 	usermanager := usermanager.New(log, storage)
 
 	grpcapp := grpcapp.New(log, usermanager, port)

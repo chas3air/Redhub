@@ -40,7 +40,6 @@ var (
 // Login implements interfaces.Auth.
 func (a AuthService) Login(ctx context.Context, email string, password string, appID uuid.UUID) (token string, err error) {
 	const op = "service.auth.login"
-
 	log := a.log.With(
 		slog.String("op", op),
 		slog.String("email", email),
@@ -55,6 +54,7 @@ func (a AuthService) Login(ctx context.Context, email string, password string, a
 			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 	}
+	log.Info("fetched user:", slog.Any("user", user))
 
 	if user.Password != password {
 		log.Warn("user not found")
@@ -90,6 +90,7 @@ func (a AuthService) Register(ctx context.Context, email string, password string
 			Id:       generated_uid,
 			Email:    email,
 			Password: password,
+			Role:     "user",
 			Nick:     "default",
 		},
 	)
