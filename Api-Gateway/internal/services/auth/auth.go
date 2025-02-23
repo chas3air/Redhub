@@ -32,7 +32,7 @@ func (as *AuthService) Login(ctx context.Context, email string, password string,
 
 	select {
 	case <-ctx.Done():
-		return "", fmt.Errorf("%s: %w", op, context.Canceled)
+		return "", fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -48,7 +48,7 @@ func (as *AuthService) Register(ctx context.Context, user models.User) (err erro
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, context.Canceled)
+		return fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -64,7 +64,7 @@ func (as *AuthService) IsAdmin(ctx context.Context, user_id uuid.UUID) (isAdmin 
 
 	select {
 	case <-ctx.Done():
-		return false, fmt.Errorf("%s: %w", op, context.Canceled)
+		return false, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 

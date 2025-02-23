@@ -35,7 +35,7 @@ func (um *UserManager) GetUsers(ctx context.Context) ([]models.User, error) {
 
 	select {
 	case <-ctx.Done():
-		return nil, fmt.Errorf("%s: %w", op, context.Canceled)
+		return nil, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -61,7 +61,7 @@ func (um *UserManager) GetUserById(ctx context.Context, uid uuid.UUID) (models.U
 
 	select {
 	case <-ctx.Done():
-		return models.User{}, fmt.Errorf("%s: %w", op, context.Canceled)
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -87,7 +87,7 @@ func (um *UserManager) GetUserByEmail(ctx context.Context, email string) (models
 
 	select {
 	case <-ctx.Done():
-		return models.User{}, fmt.Errorf("%s: %w", op, context.Canceled)
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -113,7 +113,7 @@ func (um *UserManager) Insert(ctx context.Context, user models.User) error {
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, context.Canceled)
+		return fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -141,7 +141,7 @@ func (um *UserManager) Update(ctx context.Context, uid uuid.UUID, user models.Us
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, context.Canceled)
+		return fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -169,7 +169,7 @@ func (um *UserManager) Delete(ctx context.Context, uid uuid.UUID) (models.User, 
 
 	select {
 	case <-ctx.Done():
-		return models.User{}, fmt.Errorf("%s: %w", op, context.Canceled)
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 

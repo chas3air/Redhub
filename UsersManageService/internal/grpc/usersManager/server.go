@@ -62,7 +62,7 @@ func (s *serverAPI) GetUserById(ctx context.Context, req *umv1.GetUserByIdReques
 	}
 	requested_user, err := s.userManager.GetUserById(ctx, parsedUUID)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, "user no found")
+		return nil, status.Error(codes.NotFound, "user not found")
 	}
 	profiled_user, err := profiles.UsrToProtoUsr(requested_user)
 	if err != nil {
@@ -103,7 +103,7 @@ func (s *serverAPI) Insert(ctx context.Context, req *umv1.InsertRequest) (*umv1.
 	default:
 	}
 
-	parsedUser, err := profiles.ProtoUsrToUsr((req.GetUser()))
+	parsedUser, err := profiles.ProtoUsrToUsr(req.GetUser())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid argument")
 	}
