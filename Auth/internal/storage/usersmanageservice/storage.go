@@ -52,7 +52,7 @@ func (u *UsersManageService) GetUsers(ctx context.Context) ([]models.User, error
 
 	var resUsers = make([]models.User, 0, len(res.GetUsers()))
 	for _, pbUser := range res.GetUsers() {
-		user, err := profiles.ProtoUsrToUsr(pbUser)
+		user, err := profiles.Ums_ProtoUsrToUsr(pbUser)
 		if err != nil {
 			log.Warn("failed to convert proto user to model user", sl.Err(err))
 			continue
@@ -85,7 +85,7 @@ func (u *UsersManageService) GetUserById(ctx context.Context, uid uuid.UUID) (mo
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	resUser, err := profiles.ProtoUsrToUsr(res.GetUser())
+	resUser, err := profiles.Ums_ProtoUsrToUsr(res.GetUser())
 	if err != nil {
 		log.Warn("failed to convert proto user to model user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
@@ -116,7 +116,7 @@ func (u *UsersManageService) GetUserByEmail(ctx context.Context, email string) (
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	resUser, err := profiles.ProtoUsrToUsr(res.GetUser())
+	resUser, err := profiles.Ums_ProtoUsrToUsr(res.GetUser())
 	if err != nil {
 		log.Warn("failed to convert proto user to model user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
@@ -141,7 +141,7 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 	defer conn.Close()
 
 	c := umv1.NewUsersManagerClient(conn)
-	userForInsert, err := profiles.UsrToProroUsr(user)
+	userForInsert, err := profiles.Ums_UsrToProtoUsr(user)
 	if err != nil {
 		log.Warn("failed to convert model user to proto user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
@@ -174,7 +174,7 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 	defer conn.Close()
 
 	c := umv1.NewUsersManagerClient(conn)
-	userForUpdate, err := profiles.UsrToProroUsr(user)
+	userForUpdate, err := profiles.Ums_UsrToProtoUsr(user)
 	if err != nil {
 		log.Warn("failed to convert model user to proto user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
@@ -216,7 +216,7 @@ func (u *UsersManageService) Delete(ctx context.Context, uid uuid.UUID) (models.
 		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	resUser, err := profiles.ProtoUsrToUsr(res.GetUser())
+	resUser, err := profiles.Ums_ProtoUsrToUsr(res.GetUser())
 	if err != nil {
 		log.Warn("failed to convert proto user to model user", sl.Err(err))
 		return models.User{}, fmt.Errorf("%s: %w", op, err)

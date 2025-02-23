@@ -2,6 +2,7 @@ package grpcauth
 
 import (
 	"auth/internal/domain/interfaces"
+	"auth/internal/domain/profiles"
 	authservice "auth/internal/services/auth"
 	"auth/internal/storage"
 	"context"
@@ -53,13 +54,16 @@ func (s *serverAPI) Login(ctx context.Context, in *authv1.LoginRequest) (*authv1
 }
 
 func (s *serverAPI) Register(ctx context.Context, in *authv1.RegisterRequest) (*authv1.RegisterResponse, error) {
-	email := in.GetEmail()
-	password := in.GetPassword()
-	if email == "" || password == "" {
+	req_user := in.GetUser()
+	if req_user.GetEmail() == "" || req_user.GetPassword() == "" {
 		return nil, status.Error(codes.InvalidArgument, "email and password are required")
 	}
+	user, err := profiles.Auth_ProtoUsrToUsr(req_user)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "wrong parametr")
+	}
 
-	uid, err := s.auth.Register(ctx, email, password)
+	err = s.auth.Register(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
@@ -67,9 +71,7 @@ func (s *serverAPI) Register(ctx context.Context, in *authv1.RegisterRequest) (*
 		return nil, status.Error(codes.Internal, "failed to register user")
 	}
 
-	return &authv1.RegisterResponse{
-		UserId: uid.String(),
-	}, nil
+	return nil, nil
 }
 
 func (s *serverAPI) IsAdmin(ctx context.Context, in *authv1.IsAdminRequest) (*authv1.IsAdminResponse, error) {

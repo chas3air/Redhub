@@ -76,35 +76,25 @@ func (a AuthService) Login(ctx context.Context, email string, password string, a
 }
 
 // Register implements interfaces.Auth.
-func (a AuthService) Register(ctx context.Context, email string, password string) (user_id uuid.UUID, err error) {
+func (a AuthService) Register(ctx context.Context, user models.User) (err error) {
 	const op = "service.auth.register"
 	log := a.log.With(
 		slog.String("op", op),
-		slog.String("email", email),
+		slog.String("email", user.Email),
 	)
 
-	generated_uid := uuid.New()
-	err = a.usersstorage.Insert(
-		ctx,
-		models.User{
-			Id:       generated_uid,
-			Email:    email,
-			Password: password,
-			Role:     "user",
-			Nick:     "default",
-		},
-	)
+	err = a.usersstorage.Insert(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
 			log.Warn("user already exists", sl.Err(err))
-			return uuid.UUID{}, fmt.Errorf("%s: %w", op, err)
+			return fmt.Errorf("%s: %w", op, err)
 		}
 
 		log.Error("failed to save user", sl.Err(err))
-		return uuid.UUID{}, fmt.Errorf("%s: %w", op, err)
+		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	return generated_uid, nil
+	return nil
 }
 
 // IsAdmin implements interfaces.Auth.
