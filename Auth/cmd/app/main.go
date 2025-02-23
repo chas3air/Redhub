@@ -21,8 +21,7 @@ func main() {
 
 	application := app.New(
 		log,
-		cfg.TokenTTL,
-		cfg.Grpc.Port,
+		cfg,
 	)
 
 	go func() {

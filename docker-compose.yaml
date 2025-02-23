@@ -1,0 +1,26 @@
+version: '3'
+
+networks:
+  a_ums_net:
+
+
+services:
+  auth:
+    build: 
+      context: ./Auth
+    container_name: auth
+    ports:
+      - "6000:50051"
+    networks:
+      - a_ums_net
+    depends_on:
+      - user_service
+
+  user_service:
+    build: 
+      context: ./UsersManageService
+    container_name: user_service
+    ports:
+      - "6001:50051"
+    networks:
+      - a_ums_net

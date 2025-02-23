@@ -1,7 +1,7 @@
 env: "local"
 token_ttl: 1h
 
-usersStorageHost: "usersManageService"
+usersStorageHost: "user_service"
 usersStoragePort: 50051
 
 grpc:

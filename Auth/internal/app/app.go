@@ -5,21 +5,20 @@ import (
 	authservice "auth/internal/services/auth"
 	mockapp "auth/internal/storage/mock/app"
 	"auth/internal/storage/usersmanageservice"
+	"auth/pkg/config"
 	"log/slog"
-	"time"
 )
 
 type App struct {
 	GRPCSrv *grpcapp.App
 }
 
-func New(log *slog.Logger, tokenTTL time.Duration, port int) *App {
-	usersStorage := usersmanageservice.New(log, "user_service", 50051)
-	//usersStorage := mockusers.New()
+func New(log *slog.Logger, cfg *config.Config) *App {
+	usersStorage := usersmanageservice.New(log, cfg.UsersStorageHost, cfg.UsersStoragePort)
 	appProvider := mockapp.New(log)
 
-	authservice := authservice.New(log, usersStorage, appProvider, tokenTTL)
-	grpcapp := grpcapp.New(log, authservice, port)
+	authservice := authservice.New(log, usersStorage, appProvider, cfg.TokenTTL)
+	grpcapp := grpcapp.New(log, authservice, cfg.Grpc.Port)
 
 	return &App{
 		GRPCSrv: grpcapp,
