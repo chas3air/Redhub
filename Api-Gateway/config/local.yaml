@@ -1,0 +1,12 @@
+env: "local"
+token_ttl: 1h
+
+usersStorageHost: "user_service"
+usersStoragePort: 50051
+
+authHost: "auth"
+authPost: 50051
+
+grpc:
+  port: 50051
+  timeout: 10h
