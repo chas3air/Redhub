@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	github.com/chas3air/protos v0.2.2
+	github.com/chas3air/protos v0.2.3
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1

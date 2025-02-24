@@ -18,7 +18,7 @@ require (
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/chas3air/protos v0.2.2 // indirect
+	github.com/chas3air/protos v0.2.3 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/ilyakaznacheev/cleanenv v1.5.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect

@@ -12,6 +12,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type UsersController struct {
@@ -30,7 +32,7 @@ func (uc *UsersController) handleError(w http.ResponseWriter, err error, log *sl
 	if errors.Is(err, context.Canceled) {
 		log.Error("Request was canceled by the user")
 		http.Error(w, "Request canceled", http.StatusRequestTimeout)
-	} else if errors.Is(err, context.DeadlineExceeded) {
+	} else if errors.Is(err, context.DeadlineExceeded) || status.Code(err) == codes.DeadlineExceeded {
 		log.Error("Request timed out")
 		http.Error(w, "Request timeout", http.StatusRequestTimeout)
 	} else {

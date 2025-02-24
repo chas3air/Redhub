@@ -17,13 +17,14 @@ func New() *MockStorage {
 	generated_id := uuid.New()
 	return &MockStorage{
 		users: map[uuid.UUID]models.User{
-			generated_id: models.User{
-				Id:       generated_id,
-				Email:    "testuser@example.com",
-				Password: "securepassword",
-				Role:     "admin",
-				Nick:     "test_nick",
-				Birthday: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+			generated_id: {
+				Id:          generated_id,
+				Email:       "testuser@example.com",
+				Password:    "securepassword",
+				Role:        "admin",
+				Nick:        "test_nick",
+				Description: "Hello, my name is test_nick",
+				Birthday:    time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		},
 	}

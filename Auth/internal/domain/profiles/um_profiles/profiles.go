@@ -16,12 +16,13 @@ func UsrToProtoUsr(user models.User) (*umv1.User, error) {
 	}
 
 	return &umv1.User{
-		Id:       user.Id.String(),
-		Email:    user.Email,
-		Password: user.Password,
-		Role:     user.Role,
-		Nick:     user.Nick,
-		Birthday: birthday,
+		Id:          user.Id.String(),
+		Email:       user.Email,
+		Password:    user.Password,
+		Role:        user.Role,
+		Nick:        user.Nick,
+		Description: user.Description,
+		Birthday:    birthday,
 	}, nil
 }
 
@@ -37,11 +38,12 @@ func ProtoUsrToUsr(proto_usr *umv1.User) (models.User, error) {
 	}
 
 	return models.User{
-		Id:       parsedUUID,
-		Email:    proto_usr.GetEmail(),
-		Password: proto_usr.GetPassword(),
-		Role:     proto_usr.GetRole(),
-		Nick:     proto_usr.GetNick(),
-		Birthday: birthday,
+		Id:          parsedUUID,
+		Email:       proto_usr.GetEmail(),
+		Password:    proto_usr.GetPassword(),
+		Role:        proto_usr.GetRole(),
+		Nick:        proto_usr.GetNick(),
+		Description: proto_usr.GetDescription(),
+		Birthday:    birthday,
 	}, nil
 }

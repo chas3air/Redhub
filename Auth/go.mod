@@ -5,7 +5,7 @@ go 1.23.6
 require github.com/ilyakaznacheev/cleanenv v1.5.0
 
 require (
-	github.com/chas3air/protos v0.2.2 // indirect
+	github.com/chas3air/protos v0.2.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	golang.org/x/net v0.32.0 // indirect
