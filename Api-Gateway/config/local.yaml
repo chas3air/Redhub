@@ -7,5 +7,5 @@ authHost: "auth"
 authPost: 50051
 
 api:
-  port: 50051
+  port: 8080
   timeout: 5s

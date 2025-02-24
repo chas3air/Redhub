@@ -5,6 +5,15 @@ networks:
 
 
 services:
+  api-gateway:
+    build: 
+      context: ./Api-Gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - a_ums_net
+      
   auth:
     build: 
       context: ./Auth

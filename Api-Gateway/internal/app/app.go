@@ -5,8 +5,8 @@ import (
 	userscontroller "apigateway/internal/controllers/usersManager"
 	authservice "apigateway/internal/services/auth"
 	usersmanagerservice "apigateway/internal/services/usersManager"
-	mockauth "apigateway/internal/storage/mock/auth"
-	mockusersmanager "apigateway/internal/storage/mock/usersManager"
+	authstorage "apigateway/internal/storage/real/auth"
+	usersmanagerstorage "apigateway/internal/storage/real/usersManager"
 	"apigateway/pkg/config"
 	"fmt"
 	"log/slog"
@@ -28,12 +28,12 @@ func New(log *slog.Logger, cfg *config.Config) *App {
 }
 
 func (a *App) Start() {
-	authstorage_mock := mockauth.NewMockAuth()
-	auth_service := authservice.New(a.log, authstorage_mock)
+	authstorage := authstorage.New(a.log, a.cfg.AuthHost, a.cfg.AuthPort)
+	auth_service := authservice.New(a.log, authstorage)
 	authcontroller := authcontroller.New(a.log, auth_service)
 
-	usersmanagerstorage_mock := mockusersmanager.New()
-	usersmanager_service := usersmanagerservice.New(a.log, usersmanagerstorage_mock)
+	usersmanagerstorage := usersmanagerstorage.New(a.log, a.cfg.UsersStorageHost, a.cfg.UsersStoragePort)
+	usersmanager_service := usersmanagerservice.New(a.log, usersmanagerstorage)
 	userscontroller := userscontroller.New(a.log, usersmanager_service)
 
 	r := mux.NewRouter()

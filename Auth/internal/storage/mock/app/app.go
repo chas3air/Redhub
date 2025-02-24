@@ -15,10 +15,13 @@ type AppProvider struct {
 
 func New(log *slog.Logger) *AppProvider {
 	apps := make(map[uuid.UUID]models.App, 5)
-	generated_id := uuid.New()
-	log.Info("Showing app-id:", slog.String("app_id", generated_id.String()))
-	apps[generated_id] = models.App{
-		Id:     generated_id,
+	generatedID, err := uuid.Parse("395ac0be-afd9-4434-a2d1-65d2472ad009")
+	if err != nil {
+		panic(err)
+	}
+	log.Info("Showing app-id:", slog.String("app_id", generatedID.String()))
+	apps[generatedID] = models.App{
+		Id:     generatedID,
 		Alias:  "Postman",
 		Secret: "secret",
 	}

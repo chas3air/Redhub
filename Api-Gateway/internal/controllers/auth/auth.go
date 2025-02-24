@@ -59,8 +59,9 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user_credentials struct {
-		Login    string `json:"login"`
+		Login    string `json:"email"`
 		Password string `json:"password"`
+		AppID    string `json:"app_id"`
 	}
 	if err := json.Unmarshal(body, &user_credentials); err != nil {
 		log.Error("Bad request", sl.Err(err))
@@ -68,7 +69,14 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := ac.auth_service.Login(r.Context(), user_credentials.Login, user_credentials.Password, uuid.New())
+	app_id, err := uuid.Parse(user_credentials.AppID)
+	if err != nil {
+		log.Error("Invalid UUID format", sl.Err(err))
+		http.Error(w, "Invalid UUID", http.StatusBadRequest)
+		return
+	}
+
+	token, err := ac.auth_service.Login(r.Context(), user_credentials.Login, user_credentials.Password, app_id)
 	if err != nil {
 		ac.handleError(w, err, log)
 		return

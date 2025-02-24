@@ -4,7 +4,7 @@ import (
 	grpcapp "auth/internal/app/grpc"
 	authservice "auth/internal/services/auth"
 	mockapp "auth/internal/storage/mock/app"
-	mockusers "auth/internal/storage/mock/users"
+	"auth/internal/storage/usersmanageservice"
 	"auth/pkg/config"
 	"log/slog"
 )
@@ -14,8 +14,8 @@ type App struct {
 }
 
 func New(log *slog.Logger, cfg *config.Config) *App {
-	//usersStorage := usersmanageservice.New(log, cfg.UsersStorageHost, cfg.UsersStoragePort)
-	usersStorage := mockusers.New()
+	usersStorage := usersmanageservice.New(log, cfg.UsersStorageHost, cfg.UsersStoragePort)
+	//usersStorage := mockusers.New()
 	appProvider := mockapp.New(log)
 
 	authservice := authservice.New(log, usersStorage, appProvider, cfg.TokenTTL)

@@ -22,7 +22,7 @@ func New(log *slog.Logger, storage interfaces.Auth) *AuthService {
 	}
 }
 
-func (as *AuthService) Login(ctx context.Context, email string, password string, appID uuid.UUID) (token string, err error) {
+func (as *AuthService) Login(ctx context.Context, email string, password string, appID uuid.UUID) (string, error) {
 	const op = "service.auth.login"
 	log := as.log.With(
 		slog.String("op", op),
@@ -36,9 +36,15 @@ func (as *AuthService) Login(ctx context.Context, email string, password string,
 	default:
 	}
 
-	panic("unimplemented")
+	token, err := as.storage.Login(ctx, email, password, appID)
+	if err != nil {
+		return "", fmt.Errorf("%s: %w", op, err)
+	}
+
+	return token, nil
 }
-func (as *AuthService) Register(ctx context.Context, user models.User) (err error) {
+
+func (as *AuthService) Register(ctx context.Context, user models.User) error {
 	const op = "service.auth.register"
 	log := as.log.With(
 		slog.String("op", op),
@@ -52,9 +58,14 @@ func (as *AuthService) Register(ctx context.Context, user models.User) (err erro
 	default:
 	}
 
-	panic("unimplemented")
+	err := as.storage.Register(ctx, user)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
 }
-func (as *AuthService) IsAdmin(ctx context.Context, user_id uuid.UUID) (isAdmin bool, err error) {
+func (as *AuthService) IsAdmin(ctx context.Context, user_id uuid.UUID) (bool, error) {
 	const op = "service.auth.isAdmin"
 	log := as.log.With(
 		slog.String("op", op),
@@ -68,5 +79,10 @@ func (as *AuthService) IsAdmin(ctx context.Context, user_id uuid.UUID) (isAdmin 
 	default:
 	}
 
-	panic("unimplemented")
+	isAdmin, err := as.storage.IsAdmin(ctx, user_id)
+	if err != nil {
+		return false, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return isAdmin, nil
 }
