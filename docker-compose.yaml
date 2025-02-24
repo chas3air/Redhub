@@ -1,7 +1,7 @@
 version: '3'
 
 networks:
-  a_ums_net:
+  work_net:
 
 
 services:
@@ -12,7 +12,7 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - a_ums_net
+      - work_net
       
   auth:
     build: 
@@ -21,7 +21,7 @@ services:
     ports:
       - "6000:50051"
     networks:
-      - a_ums_net
+      - work_net
     depends_on:
       - user_service
 
@@ -32,4 +32,18 @@ services:
     ports:
       - "6001:50051"
     networks:
-      - a_ums_net
+      - work_net
+    depends_on:
+      - psql
+    environment:
+      - DATABASE_URL=postgres://postgres:gorm@psql:5432/postgres?sslmode=disable
+
+  psql:
+    image: postgres:latest
+    container_name: psql
+    ports:
+      - "6002:5432"
+    networks:
+      - work_net
+    environment:
+      POSTGRES_PASSWORD: "gorm"
