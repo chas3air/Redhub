@@ -5,32 +5,43 @@ networks:
 
 
 services:
+  nginx:
+    build:
+      context: ./Nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    networks:
+      - work_net
+    depends_on:
+      - api-gateway
+
   api-gateway:
     build: 
       context: ./Api-Gateway
     container_name: api-gateway
     ports:
-      - "8080:8080"
+      - 8080:8080
     networks:
       - work_net
-      
+    environment:
+      - AUTH_SECRET=97de4e89-0eaf-49a5-bc5d-d2d54007f626
+
   auth:
     build: 
       context: ./Auth
     container_name: auth
-    ports:
-      - "6000:50051"
     networks:
       - work_net
     depends_on:
       - user_service
+    environment:
+      - AUTH_SECRET=97de4e89-0eaf-49a5-bc5d-d2d54007f626
 
   user_service:
     build: 
       context: ./UsersManageService
     container_name: user_service
-    ports:
-      - "6001:50051"
     networks:
       - work_net
     depends_on:

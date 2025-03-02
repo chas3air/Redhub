@@ -16,18 +16,18 @@ import (
 )
 
 type AuthService struct {
-	log          *slog.Logger
-	usersstorage interfaces.UsersStorage
-	appProvider  interfaces.AppProvider
-	tokenTTL     time.Duration
+	log             *slog.Logger
+	usersstorage    interfaces.UsersStorage
+	accessTokenTTL  time.Duration
+	refreshTokenTTL time.Duration
 }
 
-func New(log *slog.Logger, usersStorage interfaces.UsersStorage, appProvider interfaces.AppProvider, tokenTTL time.Duration) *AuthService {
+func New(log *slog.Logger, usersStorage interfaces.UsersStorage, accessTokenTTL time.Duration, refreshTokenTTL time.Duration) *AuthService {
 	return &AuthService{
-		log:          log,
-		usersstorage: usersStorage,
-		appProvider:  appProvider,
-		tokenTTL:     tokenTTL,
+		log:             log,
+		usersstorage:    usersStorage,
+		accessTokenTTL:  accessTokenTTL,
+		refreshTokenTTL: refreshTokenTTL,
 	}
 }
 
@@ -38,7 +38,7 @@ var (
 )
 
 // Login implements interfaces.Auth.
-func (a AuthService) Login(ctx context.Context, email string, password string, appID uuid.UUID) (token string, err error) {
+func (a AuthService) Login(ctx context.Context, email string, password string) (string, string, error) {
 	const op = "service.auth.login"
 	log := a.log.With(
 		slog.String("op", op),
@@ -49,7 +49,7 @@ func (a AuthService) Login(ctx context.Context, email string, password string, a
 
 	select {
 	case <-ctx.Done():
-		return "", fmt.Errorf("%s: %w", op, ctx.Err())
+		return "", "", fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -57,28 +57,23 @@ func (a AuthService) Login(ctx context.Context, email string, password string, a
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
 			log.Warn("user not found")
-			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return "", "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 	}
 	log.Info("fetched user:", slog.Any("user", user))
 
 	if user.Password != password {
 		log.Warn("user not found")
-		return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return "", "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 
-	app, err := a.appProvider.App(ctx, appID)
-	if err != nil {
-		return "", fmt.Errorf("%s: %w", op, err)
-	}
-
-	token, err = jwt.NewToken(user, app, a.tokenTTL)
+	accessToken, refreshToken, err := jwt.NewTokens(user, a.accessTokenTTL, a.refreshTokenTTL)
 	if err != nil {
 		log.Error("failed to generate token", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
+		return "", "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	return
+	return accessToken, refreshToken, nil
 }
 
 // Register implements interfaces.Auth.

@@ -8,11 +8,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load()
 	cfg := config.MustLoad()
-
 	log := logger.SetupLogger(cfg.Env)
 
 	log.Info(

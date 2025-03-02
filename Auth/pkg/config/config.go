@@ -10,7 +10,8 @@ import (
 
 type Config struct {
 	Env              string        `yaml:"env" env-default:"local"`
-	TokenTTL         time.Duration `yaml:"token_ttl" env-default:"1h"`
+	AccessTokenTTL   time.Duration `yaml:"access_token_ttl" env-default:"15m"`
+	RefreshTokenTTL  time.Duration `yaml:"refresh_token_ttl" env-default:"5h"`
 	UsersStorageHost string        `yaml:"usersStorageHost" env-default:"usersManageService"`
 	UsersStoragePort int           `yaml:"usersStoragePort" env-default:"50051"`
 	Grpc             GrpcConfig    `yaml:"grpc"`

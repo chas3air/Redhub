@@ -22,7 +22,7 @@ func New(log *slog.Logger, storage interfaces.Auth) *AuthService {
 	}
 }
 
-func (as *AuthService) Login(ctx context.Context, email string, password string, appID uuid.UUID) (string, error) {
+func (as *AuthService) Login(ctx context.Context, email string, password string) (string, string, error) {
 	const op = "service.auth.login"
 	log := as.log.With(
 		slog.String("op", op),
@@ -32,16 +32,16 @@ func (as *AuthService) Login(ctx context.Context, email string, password string,
 
 	select {
 	case <-ctx.Done():
-		return "", fmt.Errorf("%s: %w", op, ctx.Err())
+		return "", "", fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
-	token, err := as.storage.Login(ctx, email, password, appID)
+	accessToken, refreshToken, err := as.storage.Login(ctx, email, password)
 	if err != nil {
-		return "", fmt.Errorf("%s: %w", op, err)
+		return "", "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	return token, nil
+	return accessToken, refreshToken, nil
 }
 
 func (as *AuthService) Register(ctx context.Context, user models.User) error {

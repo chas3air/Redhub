@@ -6,10 +6,16 @@ github.com/chas3air/protos v0.2.2 h1:LaZUtcR12wUGVRy1CVO7TKc62bDdL1AnoURZ4uSxVv4
 github.com/chas3air/protos v0.2.2/go.mod h1:vDBW+iT4gcFFyPZIuUi5929blqqBL8qI5vBNZxuswNc=
 github.com/chas3air/protos v0.2.3 h1:3KxKwl5Kvmdol9UZ264JoRydxWDFasgEZ8GvNtnzdp0=
 github.com/chas3air/protos v0.2.3/go.mod h1:vDBW+iT4gcFFyPZIuUi5929blqqBL8qI5vBNZxuswNc=
+github.com/chas3air/protos v0.3.1 h1:X32IkjFNcYO9tpTWnujWbg2dodRf64umYQJXVjlHREA=
+github.com/chas3air/protos v0.3.1/go.mod h1:vDBW+iT4gcFFyPZIuUi5929blqqBL8qI5vBNZxuswNc=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/fatih/color v1.18.0 h1:S8gINlzdQ840/4pfAwic/ZE0djQEH3wM94VfqLTZcOM=
 github.com/fatih/color v1.18.0/go.mod h1:4FelSpRwEGDpQ12mAdzqdOukCy4u8WUtOY6lkT/6HfU=
 github.com/golang-jwt/jwt v3.2.2+incompatible h1:IfV12K8xAKAnZqdXVzCZ+TOjboZ2keLg81eXfW3O+oY=
 github.com/golang-jwt/jwt v3.2.2+incompatible/go.mod h1:8pz2t5EyA70fFQQSrl6XZXzqecmYZeUEB8OUGHkxJ+I=
+github.com/golang-jwt/jwt/v5 v5.2.1 h1:OuVbFODueb089Lh128TAcimifWaLhJwVflnrgM17wHk=
+github.com/golang-jwt/jwt/v5 v5.2.1/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=

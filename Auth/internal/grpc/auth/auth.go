@@ -3,6 +3,7 @@ package grpcauth
 import (
 	"auth/internal/domain/interfaces"
 	authprofiles "auth/internal/domain/profiles/auth_profiles"
+	nullchecker "auth/internal/domain/profiles/nullChecker"
 	authservice "auth/internal/services/auth"
 	"auth/internal/storage"
 	"context"
@@ -36,17 +37,8 @@ func (s *serverAPI) Login(ctx context.Context, in *authv1.LoginRequest) (*authv1
 	if email == "" || password == "" {
 		return nil, status.Error(codes.InvalidArgument, "email and password are required")
 	}
-	s_aid := in.GetAppId()
-	if s_aid == "" {
-		return nil, status.Error(codes.InvalidArgument, "app_id is required")
-	}
 
-	aid_uuid, err := uuid.Parse(s_aid)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "app_id must be uuid")
-	}
-
-	token, err := s.auth.Login(ctx, email, password, aid_uuid)
+	accessToken, refreshToken, err := s.auth.Login(ctx, email, password)
 	if err != nil {
 		if errors.Is(err, authservice.ErrInvalidCredentials) {
 			return nil, status.Error(codes.NotFound, "invalid email or password")
@@ -55,7 +47,8 @@ func (s *serverAPI) Login(ctx context.Context, in *authv1.LoginRequest) (*authv1
 	}
 
 	return &authv1.LoginResponse{
-		Token: token,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}, nil
 }
 
@@ -73,6 +66,10 @@ func (s *serverAPI) Register(ctx context.Context, in *authv1.RegisterRequest) (*
 	user, err := authprofiles.ProtoUsrToUsr(req_user)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "wrong parametr")
+	}
+
+	if !nullchecker.IsUserNullChecker(user) {
+		return nil, status.Error(codes.InvalidArgument, "not all user fields are feeled")
 	}
 
 	err = s.auth.Register(ctx, user)

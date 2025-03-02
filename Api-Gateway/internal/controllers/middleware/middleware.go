@@ -1,73 +1,43 @@
 package middleware
 
 import (
-	usersmanagerservice "apigateway/internal/services/usersManager"
-	"fmt"
+	tokenparser "apigateway/internal/lib/jwt/tokenParser"
 	"net/http"
+	"os"
 	"strings"
-
-	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
+	"time"
 )
 
-type Claims struct {
-	Uid  string `json:"uid"`
-	Role string `json:"role"`
-	Aid  string `json:"aid"`
-	Exp  int64  `json:"exp"`
-	jwt.StandardClaims
+type Middleware struct {
 }
 
-func ValidateToken(next http.Handler, user_service *usersmanagerservice.UsersManager) http.Handler {
+func New() *Middleware {
+	return &Middleware{}
+}
+
+// Middleware для проверки токена
+func (m *Middleware) ValidateToken(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenString := r.Header.Get("Authorization")
-		if tokenString == "" {
-			http.Error(w, "Missing authorization token", http.StatusUnauthorized)
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		tokenString = strings.TrimPrefix(tokenString, "Bearer")
-		claims, err := parseToken(tokenString, nil)
+		tokenString := strings.TrimSpace(strings.Replace(authHeader, "Bearer", "", 1))
+
+		secretKey := []byte(os.Getenv("AUTH_SECRET"))
+		claims, err := tokenparser.ParseToken(tokenString, secretKey)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
-		uuidUID, err := uuid.Parse(claims.Aid)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		user, err := user_service.GetUserById(r.Context(), uuidUID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-
-		if user.Role != claims.Role {
-			http.Error(w, "invalid token", http.StatusBadRequest)
+		if claims.Exp.Before(time.Now()) {
+			http.Error(w, "Token has expired", http.StatusUnauthorized)
 			return
 		}
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func parseToken(tokenString string, secretKey []byte) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return secretKey, nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		return claims, nil
-	}
-
-	return nil, fmt.Errorf("invalid token")
 }

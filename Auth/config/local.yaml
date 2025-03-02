@@ -1,5 +1,6 @@
 env: "local"
-token_ttl: 1h
+access_token_ttl: 15m
+refresh_token_ttl: 15m
 
 usersStorageHost: "user_service"
 usersStoragePort: 50051

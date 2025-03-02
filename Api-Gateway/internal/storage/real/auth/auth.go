@@ -28,7 +28,7 @@ func New(log *slog.Logger, host string, port int) *AuthStorage {
 	}
 }
 
-func (as *AuthStorage) Login(ctx context.Context, email string, password string, app_id uuid.UUID) (token string, err error) {
+func (as *AuthStorage) Login(ctx context.Context, email string, password string) (accessToken string, refreshToken string, err error) {
 	const op = "service.auth.login"
 	log := as.log.With(
 		slog.String("op", op),
@@ -37,7 +37,7 @@ func (as *AuthStorage) Login(ctx context.Context, email string, password string,
 
 	select {
 	case <-ctx.Done():
-		return "", fmt.Errorf("%s: %w", op, ctx.Err())
+		return "", "", fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -47,7 +47,7 @@ func (as *AuthStorage) Login(ctx context.Context, email string, password string,
 	)
 	if err != nil {
 		log.Error("failed to connect to gRPC server", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
+		return "", "", fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
 
@@ -55,15 +55,14 @@ func (as *AuthStorage) Login(ctx context.Context, email string, password string,
 	res, err := c.Login(ctx,
 		&authv1.LoginRequest{Email: email,
 			Password: password,
-			AppId:    app_id.String(),
 		},
 	)
 	if err != nil {
 		log.Warn("failed to get users", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
+		return "", "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	return res.GetToken(), nil
+	return res.GetAccessToken(), res.GetRefreshToken(), nil
 }
 
 func (as *AuthStorage) Register(ctx context.Context, user models.User) (err error) {
