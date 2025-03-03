@@ -12,7 +12,6 @@ type Article struct {
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	OwnerId   uuid.UUID `json:"owner_id"`
-	Tags      []string  `json:"tags"`
 	Comments  []Comment `json:"comments"`
 }
 
