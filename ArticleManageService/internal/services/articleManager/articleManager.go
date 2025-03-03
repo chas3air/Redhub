@@ -3,6 +3,8 @@ package articlemanager
 import (
 	"articlesManageService/internal/domain/interfaces/storage"
 	"articlesManageService/internal/domain/models"
+	"articlesManageService/internal/services"
+
 	"context"
 	"fmt"
 	"log/slog"
@@ -22,8 +24,8 @@ func New(log *slog.Logger, storage storage.Storage) *ArticleManager {
 	}
 }
 
-// GetAtricles implements articlesservice.ArticlesManager.
-func (am *ArticleManager) GetAtricles(ctx context.Context) ([]models.Article, error) {
+// GetArticles implements articlesservice.ArticlesManager.
+func (am *ArticleManager) GetArticles(ctx context.Context) ([]models.Article, error) {
 	const op = "services.articleManager.getArticles"
 	log := am.log.With(slog.String("operation", op))
 
@@ -55,6 +57,9 @@ func (am *ArticleManager) GetArticleById(ctx context.Context, aid uuid.UUID) (mo
 
 	article, err := am.storage.GetArticleById(ctx, aid)
 	if err != nil {
+		if err == services.ErrNotFound {
+			return models.Article{}, fmt.Errorf("%s: %w", op, err)
+		}
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -95,10 +100,13 @@ func (am *ArticleManager) Insert(ctx context.Context, article models.Article) er
 
 	err := am.storage.Insert(ctx, article)
 	if err != nil {
+		if err == services.ErrAlreadyExists {
+			return fmt.Errorf("%s: %w", op, err)
+		}
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
-	log.Info("Successfully insert article")
+	log.Info("Successfully inserted article")
 	return nil
 }
 
@@ -115,9 +123,12 @@ func (am *ArticleManager) Update(ctx context.Context, aid uuid.UUID, article mod
 
 	err := am.storage.Update(ctx, aid, article)
 	if err != nil {
+		if err == services.ErrNotFound {
+			return fmt.Errorf("%s: %w", op, err)
+		}
 		return fmt.Errorf("%s: %w", op, err)
 	}
-	log.Info("Successfully update article")
+	log.Info("Successfully updated article")
 	return nil
 }
 
@@ -132,11 +143,14 @@ func (am *ArticleManager) Delete(ctx context.Context, aid uuid.UUID) (models.Art
 	default:
 	}
 
-	deleted_article, err := am.storage.Delete(ctx, aid)
+	deletedArticle, err := am.storage.Delete(ctx, aid)
 	if err != nil {
+		if err == services.ErrNotFound {
+			return models.Article{}, fmt.Errorf("%s: %w", op, err)
+		}
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	log.Info("Successfully delete article")
-	return deleted_article, nil
+	log.Info("Successfully deleted article")
+	return deletedArticle, nil
 }

@@ -177,7 +177,6 @@ func (s *PsqlStorage) Insert(ctx context.Context, article models.Article) error 
 func (s *PsqlStorage) Update(ctx context.Context, aid uuid.UUID, article models.Article) error {
 	const op = "psql.update"
 
-	// Проверка на существование статьи
 	_, err := s.GetArticleById(ctx, aid)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
