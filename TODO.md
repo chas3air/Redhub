@@ -7,6 +7,7 @@ Names of branches:
     6. task-add-description: add description to user struct
     7. task-articlesManageService: creaitng ArticlesManageService
     8. fix-secret-store: fix storing clients secrets
+    9. task-addArticleClient: add article client to article service
     
 
 

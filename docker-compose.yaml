@@ -4,50 +4,67 @@ networks:
   work_net:
 
 
+volumes:
+  redhub_volume:
+
+
 services:
-  nginx:
-    build:
-      context: ./Nginx
-    container_name: nginx
+  # nginx:
+  #   build:
+  #     context: ./Nginx
+  #   container_name: nginx
+  #   ports:
+  #     - "80:80"
+  #   networks:
+  #     - work_net
+  #   depends_on:
+  #     - api-gateway
+
+  # api-gateway:
+  #   build: 
+  #     context: ./Api-Gateway
+  #   container_name: api-gateway
+  #   ports:
+  #     - 8080:8080
+  #   networks:
+  #     - work_net
+  #   environment:
+  #     - AUTH_SECRET=97de4e89-0eaf-49a5-bc5d-d2d54007f626
+
+  # auth:
+  #   build: 
+  #     context: ./Auth
+  #   container_name: auth
+  #   networks:
+  #     - work_net
+  #   depends_on:
+  #     - user_service
+  #   environment:
+  #     - AUTH_SECRET=97de4e89-0eaf-49a5-bc5d-d2d54007f626
+
+  # user_service:
+  #   build: 
+  #     context: ./UsersManageService
+  #   container_name: user_service
+  #   networks:
+  #     - work_net
+  #   depends_on:
+  #     - psql
+  #   environment:
+  #     - DATABASE_URL=postgres://postgres:123@psql:5432/postgres?sslmode=disable
+
+  article_service:
+    build: 
+      context: ./ArticleManageService
+    container_name: article_service
+    networks:
+      - work_net
     ports:
-      - "80:80"
-    networks:
-      - work_net
-    depends_on:
-      - api-gateway
-
-  api-gateway:
-    build: 
-      context: ./Api-Gateway
-    container_name: api-gateway
-    ports:
-      - 8080:8080
-    networks:
-      - work_net
-    environment:
-      - AUTH_SECRET=97de4e89-0eaf-49a5-bc5d-d2d54007f626
-
-  auth:
-    build: 
-      context: ./Auth
-    container_name: auth
-    networks:
-      - work_net
-    depends_on:
-      - user_service
-    environment:
-      - AUTH_SECRET=97de4e89-0eaf-49a5-bc5d-d2d54007f626
-
-  user_service:
-    build: 
-      context: ./UsersManageService
-    container_name: user_service
-    networks:
-      - work_net
+      - 6000:50051
     depends_on:
       - psql
     environment:
-      - DATABASE_URL=postgres://postgres:gorm@psql:5432/postgres?sslmode=disable
+      - DATABASE_URL=postgres://postgres:123@psql:5432/redhub?sslmode=disable
 
   psql:
     image: postgres:latest
@@ -57,4 +74,6 @@ services:
     networks:
       - work_net
     environment:
-      POSTGRES_PASSWORD: "gorm"
+      POSTGRES_PASSWORD: 123
+    volumes:
+      - redhub_volume:/var/lib/postgresql/data
