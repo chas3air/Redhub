@@ -1,6 +1,8 @@
 package grpcapp
 
 import (
+	"articlesManageService/internal/domain/interfaces/articlesservice"
+	articlesmanager "articlesManageService/internal/grpc/articles"
 	"fmt"
 	"log/slog"
 	"net"
@@ -14,9 +16,16 @@ type App struct {
 	port       int
 }
 
-func New() *App {
-	// TODO: доделать
-	return &App{}
+func New(log *slog.Logger, articlesManService articlesservice.ArticlesManager, port int) *App {
+	gRPCServer := grpc.NewServer()
+
+	articlesmanager.Register(gRPCServer, articlesManService)
+
+	return &App{
+		log: log,
+		gRPCServer: gRPCServer,
+		port: port,
+	}
 }
 
 func (a *App) MustRun() {

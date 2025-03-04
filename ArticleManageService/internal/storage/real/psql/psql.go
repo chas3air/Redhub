@@ -7,14 +7,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/google/uuid"
+
+	_ "github.com/lib/pq"
 )
 
 const (
-	ArticlesTableName         = "Articles"
-	CommentsTableName         = "Comments"
-	ArticleToCommentTableName = "article_to_comment"
+	ArticlesTableName = "Articles"
 )
 
 type PsqlStorage struct {
@@ -24,6 +25,7 @@ type PsqlStorage struct {
 func New(connStr string) *PsqlStorage {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
+		log.Printf("Error opening database: %v", err)
 		panic(err)
 	}
 
@@ -35,7 +37,7 @@ func New(connStr string) *PsqlStorage {
 func (s *PsqlStorage) Close() {
 	err := s.DB.Close()
 	if err != nil {
-		fmt.Println("Error closing the database:", err)
+		log.Printf("Error closing the database: %v", err)
 	}
 }
 
@@ -46,43 +48,20 @@ func (s *PsqlStorage) GetArticles(ctx context.Context) ([]models.Article, error)
 		SELECT * FROM `+ArticlesTableName+`;
 	`)
 	if err != nil {
+		log.Printf("%s: %v", op, err)
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	defer rows.Close()
 
-	articlesMap := make(map[uuid.UUID]*models.Article)
+	articles := make([]models.Article, 0, 5)
 	for rows.Next() {
 		var article models.Article
 		err := rows.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.OwnerId)
 		if err != nil {
+			log.Printf("%s: %v", op, err)
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
-		article.Comments = []models.Comment{}
-		articlesMap[article.Id] = &article
-	}
-
-	rowsForComms, err := s.DB.QueryContext(ctx, `
-		SELECT article_id, comment_id FROM `+ArticleToCommentTableName+`;
-	`)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
-	}
-	defer rowsForComms.Close()
-
-	for rowsForComms.Next() {
-		var articleID, commentID uuid.UUID
-		err := rowsForComms.Scan(&articleID, &commentID)
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", op, err)
-		}
-		if article, exists := articlesMap[articleID]; exists {
-			article.Comments = append(article.Comments, models.Comment{Id: commentID})
-		}
-	}
-
-	articles := make([]models.Article, 0, len(articlesMap))
-	for _, article := range articlesMap {
-		articles = append(articles, *article)
+		articles = append(articles, article)
 	}
 
 	return articles, nil
@@ -100,30 +79,12 @@ func (s *PsqlStorage) GetArticleById(ctx context.Context, aid uuid.UUID) (models
 	err := row.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.OwnerId)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			log.Printf("%s: %v", op, storage.ErrNotFound)
 			return models.Article{}, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
 		}
+		log.Printf("%s: %v", op, err)
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
-
-	rowsForComms, err := s.DB.QueryContext(ctx, `
-		SELECT comment_id FROM `+ArticleToCommentTableName+`
-		WHERE article_id=$1;
-	`, aid)
-	if err != nil {
-		return models.Article{}, fmt.Errorf("%s: %w", op, err)
-	}
-	defer rowsForComms.Close()
-
-	var cid uuid.UUID
-	comments := make([]models.Comment, 0)
-	for rowsForComms.Next() {
-		err := rowsForComms.Scan(&cid)
-		if err != nil {
-			return models.Article{}, fmt.Errorf("%s: %w", op, err)
-		}
-		comments = append(comments, models.Comment{Id: cid})
-	}
-	article.Comments = comments
 
 	return article, nil
 }
@@ -136,6 +97,7 @@ func (s *PsqlStorage) GetArticlesByOwnerId(ctx context.Context, uid uuid.UUID) (
 		WHERE owner_id=$1;
 	`, uid)
 	if err != nil {
+		log.Printf("%s: %v", op, err)
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	defer rows.Close()
@@ -145,6 +107,7 @@ func (s *PsqlStorage) GetArticlesByOwnerId(ctx context.Context, uid uuid.UUID) (
 		var article models.Article
 		err := rows.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.OwnerId)
 		if err != nil {
+			log.Printf("%s: %v", op, err)
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
 		articles = append(articles, article)
@@ -158,8 +121,10 @@ func (s *PsqlStorage) Insert(ctx context.Context, article models.Article) error 
 
 	_, err := s.GetArticleById(ctx, article.Id)
 	if err == nil {
+		log.Printf("%s: %v", op, storage.ErrAlreadyExists)
 		return fmt.Errorf("%s: %w", op, storage.ErrAlreadyExists)
 	} else if err != nil && !errors.Is(err, storage.ErrNotFound) {
+		log.Printf("%s: %v", op, err)
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -168,6 +133,7 @@ func (s *PsqlStorage) Insert(ctx context.Context, article models.Article) error 
 		VALUES ($1, $2, $3, $4, $5);
 	`, article.Id, article.CreatedAt, article.Title, article.Content, article.OwnerId)
 	if err != nil {
+		log.Printf("%s: %v", op, err)
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -180,8 +146,10 @@ func (s *PsqlStorage) Update(ctx context.Context, aid uuid.UUID, article models.
 	_, err := s.GetArticleById(ctx, aid)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
+			log.Printf("%s: %v", op, storage.ErrNotFound)
 			return fmt.Errorf("%s: %w", op, storage.ErrNotFound)
 		}
+		log.Printf("%s: %v", op, err)
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -192,6 +160,7 @@ func (s *PsqlStorage) Update(ctx context.Context, aid uuid.UUID, article models.
 		WHERE id = $3;
 	`, article.Title, article.Content, aid)
 	if err != nil {
+		log.Printf("%s: %v", op, err)
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -203,6 +172,7 @@ func (s *PsqlStorage) Delete(ctx context.Context, aid uuid.UUID) (models.Article
 
 	article, err := s.GetArticleById(ctx, aid)
 	if err != nil {
+		log.Printf("%s: %v", op, err)
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -212,6 +182,7 @@ func (s *PsqlStorage) Delete(ctx context.Context, aid uuid.UUID) (models.Article
 	`, aid)
 
 	if err != nil {
+		log.Printf("%s: %v", op, err)
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 

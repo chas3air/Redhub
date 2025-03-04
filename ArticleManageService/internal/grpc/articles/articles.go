@@ -1,8 +1,10 @@
-package articlesManager
+package articlesmanager
 
 import (
 	"articlesManageService/internal/domain/interfaces/articlesservice"
+	"articlesManageService/internal/domain/models"
 	"articlesManageService/internal/domain/profiles"
+	"articlesManageService/internal/services"
 	"context"
 	"log"
 
@@ -30,16 +32,16 @@ func (s *serverAPI) GetArticles(ctx context.Context, req *amv1.GetArticlesReques
 	default:
 	}
 
-	app_aticles, err := s.articlesManager.GetAtricles(ctx)
+	app_articles, err := s.articlesManager.GetArticles(ctx)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to retrieve app articles")
 	}
 
-	resp_articles := make([]*amv1.Article, 0, len(app_aticles))
-	for _, article := range app_aticles {
+	resp_articles := make([]*amv1.Article, 0, len(app_articles))
+	for _, article := range app_articles {
 		profiles_article, err := profiles.ArtToProtoArt(article)
 		if err != nil {
-			log.Println("error article:", article)
+			log.Println("error converting article to proto:", err)
 			continue
 		}
 		resp_articles = append(resp_articles, profiles_article)
@@ -60,30 +62,33 @@ func (s *serverAPI) GetArticleById(ctx context.Context, req *amv1.GetArticleById
 
 	id_s := req.GetArticleId()
 	if id_s == "" {
-		return nil, status.Error(codes.InvalidArgument, "requared parametr id")
+		return nil, status.Error(codes.InvalidArgument, "required parameter id")
 	}
 
-	parsedUUID, err := uuid.Parse(req.GetArticleId())
+	parsedUUID, err := uuid.Parse(id_s)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
 	}
 
 	app_article, err := s.articlesManager.GetArticleById(ctx, parsedUUID)
 	if err != nil {
+		if err == services.ErrNotFound {
+			return nil, status.Error(codes.NotFound, "article not found")
+		}
 		return nil, status.Error(codes.Internal, "failed to retrieve article by id")
 	}
 
-	profied_article, err := profiles.ArtToProtoArt(app_article)
+	profiles_article, err := profiles.ArtToProtoArt(app_article)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to customise article")
+		return nil, status.Error(codes.Internal, "failed to customize article")
 	}
 
 	return &amv1.GetArticleByIdResponse{
-		Article: profied_article,
+		Article: profiles_article,
 	}, nil
 }
 
-// GetArticleByOwnerId implements amv1.ArticlesManagerServer.
+// GetArticlesByOwnerId implements amv1.ArticlesManagerServer.
 func (s *serverAPI) GetArticlesByOwnerId(ctx context.Context, req *amv1.GetArticlesByOwnerIdRequest) (*amv1.GetArticlesByOwnerIdResponse, error) {
 	select {
 	case <-ctx.Done():
@@ -109,7 +114,7 @@ func (s *serverAPI) GetArticlesByOwnerId(ctx context.Context, req *amv1.GetArtic
 	for _, article := range app_articles {
 		profiled_article, err := profiles.ArtToProtoArt(article)
 		if err != nil {
-			log.Println("error article:", err)
+			log.Println("error converting article to proto:", err)
 			continue
 		}
 		resp_articles = append(resp_articles, profiled_article)
@@ -128,17 +133,20 @@ func (s *serverAPI) InsertArticle(ctx context.Context, req *amv1.InsertArticleRe
 	default:
 	}
 
-	app_article, err := profiles.ProtoArtToArt(*req.GetArticle())
+	app_article, err := profiles.ProtoArtToArt(req.GetArticle())
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "failed to customise")
+		return nil, status.Error(codes.InvalidArgument, "failed to customize")
 	}
 
 	err = s.articlesManager.Insert(ctx, app_article)
 	if err != nil {
+		if err == services.ErrAlreadyExists {
+			return nil, status.Error(codes.AlreadyExists, "article already exists")
+		}
 		return nil, status.Error(codes.Internal, "failed to insert article")
 	}
 
-	return nil, nil
+	return &amv1.InsertArticleResponse{}, nil
 }
 
 // UpdateArticle implements amv1.ArticlesManagerServer.
@@ -151,24 +159,24 @@ func (s *serverAPI) UpdateArticle(ctx context.Context, req *amv1.UpdateArticleRe
 
 	id_s := req.GetId()
 	if id_s == "" {
-		return nil, status.Error(codes.InvalidArgument, "requared paramert id")
+		return nil, status.Error(codes.InvalidArgument, "required parameter id")
 	}
 	parseUUID, err := uuid.Parse(id_s)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid id")
 	}
 
-	app_article, err := profiles.ProtoArtToArt(*req.GetArticle())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "failed to customise")
-	}
+	app_article := models.Article{Title: req.Article.Title, Content: req.Article.Content}
 
 	err = s.articlesManager.Update(ctx, parseUUID, app_article)
 	if err != nil {
+		if err == services.ErrNotFound {
+			return nil, status.Error(codes.NotFound, "article not found")
+		}
 		return nil, status.Error(codes.Internal, "failed to update article")
 	}
 
-	return nil, nil
+	return &amv1.UpdateArticleResponse{}, nil
 }
 
 // DeleteArticle implements amv1.ArticlesManagerServer.
@@ -181,7 +189,7 @@ func (s *serverAPI) DeleteArticle(ctx context.Context, req *amv1.DeleteArticleRe
 
 	id_s := req.GetId()
 	if id_s == "" {
-		return nil, status.Error(codes.InvalidArgument, "required parametr id")
+		return nil, status.Error(codes.InvalidArgument, "required parameter id")
 	}
 
 	parseUUID, err := uuid.Parse(id_s)
@@ -191,12 +199,15 @@ func (s *serverAPI) DeleteArticle(ctx context.Context, req *amv1.DeleteArticleRe
 
 	deleted_article, err := s.articlesManager.Delete(ctx, parseUUID)
 	if err != nil {
+		if err == services.ErrNotFound {
+			return nil, status.Error(codes.NotFound, "article not found")
+		}
 		return nil, status.Error(codes.Internal, "failed to delete article")
 	}
 
 	resp_article, err := profiles.ArtToProtoArt(deleted_article)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to customise")
+		return nil, status.Error(codes.Internal, "failed to customize")
 	}
 
 	return &amv1.DeleteArticleResponse{

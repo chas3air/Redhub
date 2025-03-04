@@ -4,6 +4,7 @@ import (
 	"articlesManageService/internal/domain/interfaces/storage"
 	"articlesManageService/internal/domain/models"
 	"articlesManageService/internal/services"
+	"articlesManageService/pkg/lib/logger/sl"
 
 	"context"
 	"fmt"
@@ -37,6 +38,7 @@ func (am *ArticleManager) GetArticles(ctx context.Context) ([]models.Article, er
 
 	articles, err := am.storage.GetArticles(ctx)
 	if err != nil {
+		log.Error("Error retrieving articles:", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -58,8 +60,10 @@ func (am *ArticleManager) GetArticleById(ctx context.Context, aid uuid.UUID) (mo
 	article, err := am.storage.GetArticleById(ctx, aid)
 	if err != nil {
 		if err == services.ErrNotFound {
+			log.Error("Article not found", sl.Err(err))
 			return models.Article{}, fmt.Errorf("%s: %w", op, err)
 		}
+		log.Error("Error retrieving article by id: %v", err)
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -78,8 +82,9 @@ func (am *ArticleManager) GetArticleByOwnerId(ctx context.Context, uid uuid.UUID
 	default:
 	}
 
-	articles, err := am.storage.GetArticleByOwnerId(ctx, uid)
+	articles, err := am.storage.GetArticlesByOwnerId(ctx, uid)
 	if err != nil {
+		log.Error("Error retrieving articles by owner id", sl.Err(err))
 		return []models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -101,8 +106,10 @@ func (am *ArticleManager) Insert(ctx context.Context, article models.Article) er
 	err := am.storage.Insert(ctx, article)
 	if err != nil {
 		if err == services.ErrAlreadyExists {
+			log.Error("Article already exists", sl.Err(err))
 			return fmt.Errorf("%s: %w", op, err)
 		}
+		log.Error("Error inserting article", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -124,8 +131,10 @@ func (am *ArticleManager) Update(ctx context.Context, aid uuid.UUID, article mod
 	err := am.storage.Update(ctx, aid, article)
 	if err != nil {
 		if err == services.ErrNotFound {
+			log.Error("Article not found for update", sl.Err(err))
 			return fmt.Errorf("%s: %w", op, err)
 		}
+		log.Error("Error updating article", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	log.Info("Successfully updated article")
@@ -146,8 +155,10 @@ func (am *ArticleManager) Delete(ctx context.Context, aid uuid.UUID) (models.Art
 	deletedArticle, err := am.storage.Delete(ctx, aid)
 	if err != nil {
 		if err == services.ErrNotFound {
+			log.Error("Article not found for deletion", sl.Err(err))
 			return models.Article{}, fmt.Errorf("%s: %w", op, err)
 		}
+		log.Error("Error deleting article", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
