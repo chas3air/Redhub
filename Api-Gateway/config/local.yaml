@@ -3,6 +3,9 @@ env: "local"
 usersStorageHost: "user_service"
 usersStoragePort: 50051
 
+articlesStorageHost: "article_service"
+articlesStoragePort: 50051
+
 authHost: "auth"
 authPost: 50051
 

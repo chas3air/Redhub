@@ -2,10 +2,9 @@ package app
 
 import (
 	"log/slog"
-	"os"
 	grpcapp "usersManageService/internal/app/grpc"
 	usermanager "usersManageService/internal/services/usersManager"
-	psqlstorage "usersManageService/internal/storage/real/psql"
+	"usersManageService/internal/storage/mock"
 )
 
 type App struct {
@@ -13,7 +12,8 @@ type App struct {
 }
 
 func New(log *slog.Logger, port int) *App {
-	storage := psqlstorage.New(os.Getenv("DATABASE_URL"))
+	// storage := psqlstorage.New(os.Getenv("DATABASE_URL"))
+	storage := mock.New()
 	usermanager := usermanager.New(log, storage)
 
 	grpcapp := grpcapp.New(log, usermanager, port)

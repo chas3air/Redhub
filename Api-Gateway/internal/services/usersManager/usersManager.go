@@ -5,6 +5,7 @@ import (
 	"apigateway/internal/domain/models"
 	"apigateway/pkg/lib/logger/sl"
 	"context"
+	"fmt"
 	"log/slog"
 
 	"github.com/google/uuid"
@@ -31,7 +32,7 @@ func (um *UsersManager) GetUsers(ctx context.Context) ([]models.User, error) {
 	users, err := um.storage.GetUsers(ctx)
 	if err != nil {
 		log.Error("error retrieving users", sl.Err(err))
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return users, nil
@@ -46,7 +47,7 @@ func (um *UsersManager) GetUserById(ctx context.Context, uid uuid.UUID) (models.
 	user, err := um.storage.GetUserById(ctx, uid)
 	if err != nil {
 		log.Error("error retrieving user by id", sl.Err(err))
-		return models.User{}, err
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return user, nil
