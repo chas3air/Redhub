@@ -44,7 +44,7 @@ func (a *ArticlesManageStorage) GetArticles(ctx context.Context) ([]models.Artic
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", sl.Err(err))
+		log.Error("Failed to connect to gRPC server", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -52,7 +52,7 @@ func (a *ArticlesManageStorage) GetArticles(ctx context.Context) ([]models.Artic
 	c := amv1.NewArticlesManagerClient(conn)
 	res, err := c.GetArticles(ctx, nil)
 	if err != nil {
-		log.Warn("failed to get articles", sl.Err(err))
+		log.Warn("Failed to get articles", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -60,7 +60,7 @@ func (a *ArticlesManageStorage) GetArticles(ctx context.Context) ([]models.Artic
 	for _, pbArticle := range res.GetArticles() {
 		article, err := amprofiles.ProtoArtToArt(pbArticle)
 		if err != nil {
-			log.Warn("failed to convert proto article to model article", sl.Err(err))
+			log.Error("Wrong structure, failed to customize", sl.Err(err))
 			continue
 		}
 		resp_articles = append(resp_articles, article)
@@ -85,7 +85,7 @@ func (a *ArticlesManageStorage) GetArticleById(ctx context.Context, aid uuid.UUI
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", sl.Err(err))
+		log.Error("Failed to connect to gRPC server", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -95,14 +95,14 @@ func (a *ArticlesManageStorage) GetArticleById(ctx context.Context, aid uuid.UUI
 		ArticleId: aid.String(),
 	})
 	if err != nil {
-		log.Warn("failed to get articles", sl.Err(err))
+		log.Warn("Failed to get articles", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	resp_article, err := amprofiles.ProtoArtToArt(res.GetArticle())
 	if err != nil {
 		log.Warn("failed to get article by id", sl.Err(err))
-		return models.Article{}, fmt.Errorf("%s: %w")
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return resp_article, nil
@@ -124,7 +124,7 @@ func (a *ArticlesManageStorage) GetArticleByOwnerId(ctx context.Context, uid uui
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", sl.Err(err))
+		log.Error("Failed to connect to gRPC server", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -134,7 +134,7 @@ func (a *ArticlesManageStorage) GetArticleByOwnerId(ctx context.Context, uid uui
 		OwnerId: uid.String(),
 	})
 	if err != nil {
-		log.Warn("failed to get articles", sl.Err(err))
+		log.Warn("Failed to get articles", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -142,7 +142,7 @@ func (a *ArticlesManageStorage) GetArticleByOwnerId(ctx context.Context, uid uui
 	for _, pbArticle := range res.GetArticles() {
 		article, err := amprofiles.ProtoArtToArt(pbArticle)
 		if err != nil {
-			log.Warn("failed to convert proto article to model article", sl.Err(err))
+			log.Error("Wrong structure, failed to customize", sl.Err(err))
 			continue
 		}
 		resp_articles = append(resp_articles, article)
@@ -164,7 +164,7 @@ func (a *ArticlesManageStorage) Insert(ctx context.Context, article models.Artic
 
 	articleForInsert, err := amprofiles.ArtToProtoArt(article)
 	if err != nil {
-		log.Error("failed format of article", sl.Err(err))
+		log.Error("Failed format of article", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -173,7 +173,7 @@ func (a *ArticlesManageStorage) Insert(ctx context.Context, article models.Artic
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", sl.Err(err))
+		log.Error("Failed to connect to gRPC server", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -183,7 +183,7 @@ func (a *ArticlesManageStorage) Insert(ctx context.Context, article models.Artic
 		Article: articleForInsert,
 	})
 	if err != nil {
-		log.Error("failed to insert article:", sl.Err(err))
+		log.Error("Failed to insert article:", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -203,7 +203,7 @@ func (a *ArticlesManageStorage) Update(ctx context.Context, aid uuid.UUID, artic
 
 	articleForInsert, err := amprofiles.ArtToProtoArt(article)
 	if err != nil {
-		log.Error("failed format of article", sl.Err(err))
+		log.Error("Failed format of article", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -212,7 +212,7 @@ func (a *ArticlesManageStorage) Update(ctx context.Context, aid uuid.UUID, artic
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", sl.Err(err))
+		log.Error("Failed to connect to gRPC server", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -223,7 +223,7 @@ func (a *ArticlesManageStorage) Update(ctx context.Context, aid uuid.UUID, artic
 		Article: articleForInsert,
 	})
 	if err != nil {
-		log.Error("failed to uodate article", sl.Err(err))
+		log.Error("Failed to update article", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -246,7 +246,7 @@ func (a *ArticlesManageStorage) Delete(ctx context.Context, aid uuid.UUID) (mode
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", sl.Err(err))
+		log.Error("Failed to connect to gRPC server", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
@@ -256,13 +256,13 @@ func (a *ArticlesManageStorage) Delete(ctx context.Context, aid uuid.UUID) (mode
 		Id: aid.String(),
 	})
 	if err != nil {
-		log.Error("failed to delete article", sl.Err(err))
+		log.Error("Failed to delete article", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	resp_article, err := amprofiles.ProtoArtToArt(res.GetArticle())
 	if err != nil {
-		log.Error("failed do convert", op, err)
+		log.Error("Wrong structure, failed to customize", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 

@@ -3,15 +3,16 @@ package psql
 import (
 	"articlesManageService/internal/domain/models"
 	"articlesManageService/internal/storage"
+	"articlesManageService/pkg/lib/logger/sl"
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/google/uuid"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 const (
@@ -19,36 +20,41 @@ const (
 )
 
 type PsqlStorage struct {
-	DB *sql.DB
+	log *slog.Logger
+	DB  *sql.DB
 }
 
-func New(connStr string) *PsqlStorage {
+func New(log *slog.Logger, connStr string) *PsqlStorage {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Printf("Error opening database: %v", err)
+		log.Error("error opening database", sl.Err(err))
 		panic(err)
 	}
 
 	return &PsqlStorage{
-		DB: db,
+		log: log,
+		DB:  db,
 	}
 }
 
 func (s *PsqlStorage) Close() {
 	err := s.DB.Close()
 	if err != nil {
-		log.Printf("Error closing the database: %v", err)
+		s.log.Info("Error closing the database: %v", sl.Err(err))
 	}
 }
 
 func (s *PsqlStorage) GetArticles(ctx context.Context) ([]models.Article, error) {
 	const op = "psql.getArticles"
+	log := s.log.With(
+		slog.String("op", op),
+	)
 
 	rows, err := s.DB.QueryContext(ctx, `
 		SELECT * FROM `+ArticlesTableName+`;
 	`)
 	if err != nil {
-		log.Printf("%s: %v", op, err)
+		log.Error("error retrieving all articles", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	defer rows.Close()
@@ -58,8 +64,8 @@ func (s *PsqlStorage) GetArticles(ctx context.Context) ([]models.Article, error)
 		var article models.Article
 		err := rows.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.OwnerId)
 		if err != nil {
-			log.Printf("%s: %v", op, err)
-			return nil, fmt.Errorf("%s: %w", op, err)
+			log.Warn("Error scaning row", sl.Err(err))
+			continue
 		}
 		articles = append(articles, article)
 	}
@@ -69,6 +75,9 @@ func (s *PsqlStorage) GetArticles(ctx context.Context) ([]models.Article, error)
 
 func (s *PsqlStorage) GetArticleById(ctx context.Context, aid uuid.UUID) (models.Article, error) {
 	const op = "psql.getArticleById"
+	log := s.log.With(
+		slog.String("op", op),
+	)
 
 	row := s.DB.QueryRowContext(ctx, `
 		SELECT * FROM `+ArticlesTableName+`
@@ -78,11 +87,12 @@ func (s *PsqlStorage) GetArticleById(ctx context.Context, aid uuid.UUID) (models
 	var article models.Article
 	err := row.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.OwnerId)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			log.Printf("%s: %v", op, storage.ErrNotFound)
+		if errors.Is(err, sql.ErrNoRows) {
+			log.Warn("Article with current id not found", sl.Err(err))
 			return models.Article{}, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
 		}
-		log.Printf("%s: %v", op, err)
+
+		log.Error("Error scaning row", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -91,13 +101,16 @@ func (s *PsqlStorage) GetArticleById(ctx context.Context, aid uuid.UUID) (models
 
 func (s *PsqlStorage) GetArticlesByOwnerId(ctx context.Context, uid uuid.UUID) ([]models.Article, error) {
 	const op = "psql.getArticlesByOwnerId"
+	log := s.log.With(
+		slog.String("op", op),
+	)
 
 	rows, err := s.DB.QueryContext(ctx, `
 		SELECT * FROM `+ArticlesTableName+`
 		WHERE owner_id=$1;
 	`, uid)
 	if err != nil {
-		log.Printf("%s: %v", op, err)
+		log.Info("Error retriening articles by owner_id")
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	defer rows.Close()
@@ -107,9 +120,10 @@ func (s *PsqlStorage) GetArticlesByOwnerId(ctx context.Context, uid uuid.UUID) (
 		var article models.Article
 		err := rows.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.OwnerId)
 		if err != nil {
-			log.Printf("%s: %v", op, err)
-			return nil, fmt.Errorf("%s: %w", op, err)
+			log.Warn("Error scaning row", sl.Err(err))
+			continue
 		}
+
 		articles = append(articles, article)
 	}
 
@@ -118,22 +132,22 @@ func (s *PsqlStorage) GetArticlesByOwnerId(ctx context.Context, uid uuid.UUID) (
 
 func (s *PsqlStorage) Insert(ctx context.Context, article models.Article) error {
 	const op = "psql.insert"
+	log := s.log.With(
+		slog.String("op", op),
+	)
 
-	_, err := s.GetArticleById(ctx, article.Id)
-	if err == nil {
-		log.Printf("%s: %v", op, storage.ErrAlreadyExists)
-		return fmt.Errorf("%s: %w", op, storage.ErrAlreadyExists)
-	} else if err != nil && !errors.Is(err, storage.ErrNotFound) {
-		log.Printf("%s: %v", op, err)
-		return fmt.Errorf("%s: %w", op, err)
-	}
-
-	_, err = s.DB.ExecContext(ctx, `
+	_, err := s.DB.ExecContext(ctx, `
 		INSERT INTO `+ArticlesTableName+` (id, created_at, title, content, owner_id)
 		VALUES ($1, $2, $3, $4, $5);
 	`, article.Id, article.CreatedAt, article.Title, article.Content, article.OwnerId)
+
 	if err != nil {
-		log.Printf("%s: %v", op, err)
+		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
+			log.Error("Article with this ID already exists", sl.Err(err))
+			return fmt.Errorf("%s: %w", op, storage.ErrAlreadyExists)
+		}
+
+		log.Error("Error inserting article", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -142,26 +156,30 @@ func (s *PsqlStorage) Insert(ctx context.Context, article models.Article) error 
 
 func (s *PsqlStorage) Update(ctx context.Context, aid uuid.UUID, article models.Article) error {
 	const op = "psql.update"
+	log := s.log.With(
+		slog.String("op", op),
+	)
 
-	_, err := s.GetArticleById(ctx, aid)
-	if err != nil {
-		if errors.Is(err, storage.ErrNotFound) {
-			log.Printf("%s: %v", op, storage.ErrNotFound)
-			return fmt.Errorf("%s: %w", op, storage.ErrNotFound)
-		}
-		log.Printf("%s: %v", op, err)
-		return fmt.Errorf("%s: %w", op, err)
-	}
-
-	_, err = s.DB.ExecContext(ctx, `
+	result, err := s.DB.ExecContext(ctx, `
 		UPDATE `+ArticlesTableName+` SET 
 			title = $1, 
 			content = $2  
 		WHERE id = $3;
 	`, article.Title, article.Content, aid)
 	if err != nil {
-		log.Printf("%s: %v", op, err)
+		log.Error("Error updating article", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Error("Error get rows affected", sl.Err(err))
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	if rowsAffected == 0 {
+		log.Error("Zero rows affected")
+		return fmt.Errorf("%s: %w", op, storage.ErrNotFound)
 	}
 
 	return nil
@@ -169,10 +187,17 @@ func (s *PsqlStorage) Update(ctx context.Context, aid uuid.UUID, article models.
 
 func (s *PsqlStorage) Delete(ctx context.Context, aid uuid.UUID) (models.Article, error) {
 	const op = "psql.delete"
+	log := s.log.With(
+		slog.String("op", op),
+	)
 
 	article, err := s.GetArticleById(ctx, aid)
 	if err != nil {
-		log.Printf("%s: %v", op, err)
+		if errors.Is(err, storage.ErrNotFound) {
+			log.Warn("Article not found", sl.Err(err))
+			return models.Article{}, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
+		}
+		log.Error("Error getting article before deliting", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -182,7 +207,7 @@ func (s *PsqlStorage) Delete(ctx context.Context, aid uuid.UUID) (models.Article
 	`, aid)
 
 	if err != nil {
-		log.Printf("%s: %v", op, err)
+		log.Error("Error deleting article", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 

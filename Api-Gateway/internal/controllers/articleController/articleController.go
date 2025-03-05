@@ -33,7 +33,7 @@ func (ac *ArticleController) handleError(w http.ResponseWriter, err error, log *
 		log.Error("Request was canceled by the user")
 		http.Error(w, "Request canceled", http.StatusRequestTimeout)
 	} else if errors.Is(err, context.DeadlineExceeded) || status.Code(err) == codes.DeadlineExceeded {
-		log.Error("Request timed out")
+		log.Error("Request time out")
 		http.Error(w, "Request timeout", http.StatusRequestTimeout)
 	} else {
 		log.Error("Operation failed", sl.Err(err))
@@ -65,7 +65,7 @@ func (ac *ArticleController) GetArticleById(w http.ResponseWriter, r *http.Reque
 	const op = "controllers.articlesController.getArticleById"
 	log := ac.log.With(slog.String("op", op))
 
-	idStr := mux.Vars(r)["id"]
+	idStr := mux.Vars(r)["article_id"]
 	uuidID, err := uuid.Parse(idStr)
 	if err != nil {
 		log.Error("Invalid UUID format", sl.Err(err))
@@ -123,7 +123,8 @@ func (ac *ArticleController) Insert(w http.ResponseWriter, r *http.Request) {
 
 	var article models.Article
 	if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
-		ac.handleError(w, err, log)
+		log.Error("Cannot parse request body", sl.Err(err))
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
@@ -143,14 +144,15 @@ func (ac *ArticleController) Update(w http.ResponseWriter, r *http.Request) {
 	article_id_s := mux.Vars(r)["article_id"]
 	article_id, err := uuid.Parse(article_id_s)
 	if err != nil {
-		log.Error("Invalid UUID format", sl.Err(err))
-		http.Error(w, "Invalid UUID", http.StatusBadRequest)
+		log.Error("Cannot parse request body", sl.Err(err))
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	var article models.Article
 	if err := json.NewDecoder(r.Body).Decode(&article); err != nil {
-		ac.handleError(w, err, log)
+		log.Error("failed decode request body", sl.Err(err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

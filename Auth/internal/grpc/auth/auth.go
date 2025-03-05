@@ -28,7 +28,7 @@ func Register(gRPC *grpc.Server, auth interfaces.Auth) {
 func (s *serverAPI) Login(ctx context.Context, in *authv1.LoginRequest) (*authv1.LoginResponse, error) {
 	select {
 	case <-ctx.Done():
-		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request time out")
 	default:
 	}
 
@@ -55,7 +55,7 @@ func (s *serverAPI) Login(ctx context.Context, in *authv1.LoginRequest) (*authv1
 func (s *serverAPI) Register(ctx context.Context, in *authv1.RegisterRequest) (*authv1.RegisterResponse, error) {
 	select {
 	case <-ctx.Done():
-		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request time out")
 	default:
 	}
 
@@ -86,7 +86,7 @@ func (s *serverAPI) Register(ctx context.Context, in *authv1.RegisterRequest) (*
 func (s *serverAPI) IsAdmin(ctx context.Context, in *authv1.IsAdminRequest) (*authv1.IsAdminResponse, error) {
 	select {
 	case <-ctx.Done():
-		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request time out")
 	default:
 	}
 

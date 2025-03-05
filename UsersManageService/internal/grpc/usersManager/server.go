@@ -26,7 +26,7 @@ func Register(grpc *grpc.Server, userManager usersservice.UsersManager) {
 func (s *serverAPI) GetUsers(ctx context.Context, req *umv1.GetUsersRequest) (*umv1.GetUsersResponse, error) {
 	select {
 	case <-ctx.Done():
-		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request time out")
 	default:
 	}
 
@@ -52,7 +52,7 @@ func (s *serverAPI) GetUsers(ctx context.Context, req *umv1.GetUsersRequest) (*u
 func (s *serverAPI) GetUserById(ctx context.Context, req *umv1.GetUserByIdRequest) (*umv1.GetUserByIdResponse, error) {
 	select {
 	case <-ctx.Done():
-		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request time out")
 	default:
 	}
 
@@ -77,7 +77,7 @@ func (s *serverAPI) GetUserById(ctx context.Context, req *umv1.GetUserByIdReques
 func (s *serverAPI) GetUserByEmail(ctx context.Context, req *umv1.GetUserByEmailRequest) (*umv1.GetUserByEmailResponse, error) {
 	select {
 	case <-ctx.Done():
-		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request time out")
 	default:
 	}
 
@@ -99,7 +99,7 @@ func (s *serverAPI) GetUserByEmail(ctx context.Context, req *umv1.GetUserByEmail
 func (s *serverAPI) Insert(ctx context.Context, req *umv1.InsertRequest) (*umv1.InsertResponse, error) {
 	select {
 	case <-ctx.Done():
-		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request time out")
 	default:
 	}
 
@@ -118,7 +118,7 @@ func (s *serverAPI) Insert(ctx context.Context, req *umv1.InsertRequest) (*umv1.
 func (s *serverAPI) Update(ctx context.Context, req *umv1.UpdateRequest) (*umv1.UpdateResponse, error) {
 	select {
 	case <-ctx.Done():
-		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request time out")
 	default:
 	}
 
@@ -143,7 +143,7 @@ func (s *serverAPI) Update(ctx context.Context, req *umv1.UpdateRequest) (*umv1.
 func (s *serverAPI) Delete(ctx context.Context, req *umv1.DeleteRequest) (*umv1.DeleteResponse, error) {
 	select {
 	case <-ctx.Done():
-		return nil, status.Error(codes.DeadlineExceeded, "request timed out")
+		return nil, status.Error(codes.DeadlineExceeded, "request time out")
 	default:
 	}
 

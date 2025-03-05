@@ -29,7 +29,7 @@ func (ac *AuthController) handleError(w http.ResponseWriter, err error, log *slo
 		log.Error("Request was canceled by the user.")
 		http.Error(w, "Request canceled", http.StatusRequestTimeout)
 	} else if errors.Is(err, context.DeadlineExceeded) {
-		log.Error("Request timed out.")
+		log.Error("Request time out.")
 		http.Error(w, "Request timeout", http.StatusRequestTimeout)
 	} else {
 		log.Error("Error occurred", sl.Err(err))

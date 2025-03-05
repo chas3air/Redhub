@@ -17,7 +17,7 @@ func main() {
 
 	log.Info("application started")
 
-	storage := psql.New(os.Getenv("DATABASE_URL"))
+	storage := psql.New(log, os.Getenv("DATABASE_URL"))
 	// storage := psql.New("postgres://postgres:123@psql:5432/postgres?sslmode=disable")
 
 	application := app.New(log, cfg.Grpc.Port, storage)

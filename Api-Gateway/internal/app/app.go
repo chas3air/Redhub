@@ -58,11 +58,11 @@ func (a *App) Start() {
 	r.HandleFunc("/api/v1/users/{id}", userscontroller.Delete).Methods(http.MethodDelete)
 
 	r.HandleFunc("/api/v1/articles", articlecontroller.GetArticles).Methods(http.MethodGet)
-	r.HandleFunc("/api/v1/articles/{id}/", articlecontroller.GetArticleById).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/articles/{article_id}/", articlecontroller.GetArticleById).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/articles/{owner_id}", articlecontroller.GetArticlesByOwnerId).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/articles", articlecontroller.Insert).Methods(http.MethodPost)
-	r.HandleFunc("/api/v1/articles/{id}", articlecontroller.Update).Methods(http.MethodPut)
-	r.HandleFunc("/api/v1/articles/{id}", articlecontroller.Delete).Methods(http.MethodDelete)
+	r.HandleFunc("/api/v1/articles/{article_id}", articlecontroller.Update).Methods(http.MethodPut)
+	r.HandleFunc("/api/v1/articles/{article_id}", articlecontroller.Delete).Methods(http.MethodDelete)
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", a.cfg.API.Port), r); err != nil {
 		panic(err)

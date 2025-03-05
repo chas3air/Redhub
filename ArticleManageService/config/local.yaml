@@ -1,5 +1,5 @@
 env: "local"
-expiration_time: 10s
+expiration_time: 5s
 
 grpc:
   port: 50051
