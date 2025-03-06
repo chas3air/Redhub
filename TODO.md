@@ -8,8 +8,13 @@ Names of branches:
     7. task-articlesManageService: creaitng ArticlesManageService
     8. fix-secret-store: fix storing clients secrets
     9. task-addArticleClient: add article client to article service
+    10. fix-UserManageService: fix users client and usersmanageservice
     
 
 
 Tasks:
     нужно сделать базу данных которая будет хранить клиентов их id и секреты. сделать какую-нибудь простую апиху которая регает их. таску оставлю на завтра. Тогда же напишу мидлваер на валидацию зареганый пользователей и нет, и раскидаю права.
+
+
+Что на завтра:
+    нужно пересмотреть и перепроверить все ошибки которые есть и передаются выше в микросервисе пользователей. И посмотреть что можно сделать с комментариями.
