@@ -20,6 +20,8 @@ type PsqlStorage struct {
 	DB  *sql.DB
 }
 
+const UsersTableName = "users"
+
 func New(log *slog.Logger, connStr string) *PsqlStorage {
 	const op = "psql.New"
 	db, err := sql.Open("postgres", connStr)
@@ -46,7 +48,7 @@ func (ps *PsqlStorage) GetUsers(ctx context.Context) ([]models.User, error) {
 	default:
 	}
 
-	rows, err := ps.DB.QueryContext(ctx, `SELECT id, email, password, role, nick, description, birthday FROM users;`)
+	rows, err := ps.DB.QueryContext(ctx, `SELECT id, email, password, role, nick, description, birthday FROM `+UsersTableName+`;`)
 	if err != nil {
 		log.Error("Error retrieving all users", sl.Err(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -80,12 +82,12 @@ func (ps *PsqlStorage) GetUserById(ctx context.Context, uid uuid.UUID) (models.U
 	}
 
 	var user models.User
-	err := ps.DB.QueryRowContext(ctx, `SELECT email, password, role, nick, description, birthday FROM users WHERE id = $1;`, uid).
-		Scan(&user.Email, &user.Password, &user.Role, &user.Nick, &user.Description, &user.Birthday)
+	err := ps.DB.QueryRowContext(ctx, `SELECT id, email, password, role, nick, description, birthday FROM `+UsersTableName+` WHERE id = $1;`, uid).
+		Scan(&user.Id, &user.Email, &user.Password, &user.Role, &user.Nick, &user.Description, &user.Birthday)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Error("User with current id not found", sl.Err(err))
-			return models.User{}, fmt.Errorf("%s: %w", op, storage_error.ErrAlreadyExists)
+			return models.User{}, fmt.Errorf("%s: %w", op, storage_error.ErrNotFound)
 		}
 
 		log.Error("Error scanning row", sl.Err(err))
@@ -108,7 +110,7 @@ func (ps *PsqlStorage) GetUserByEmail(ctx context.Context, email string) (models
 	}
 
 	var user models.User
-	err := ps.DB.QueryRowContext(ctx, `SELECT id, email, password, role, nick, description, birthday FROM users WHERE email = $1;`, email).
+	err := ps.DB.QueryRowContext(ctx, `SELECT id, email, password, role, nick, description, birthday FROM `+UsersTableName+` WHERE email = $1;`, email).
 		Scan(&user.Id, &user.Email, &user.Password, &user.Role, &user.Nick, &user.Description, &user.Birthday)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -136,7 +138,7 @@ func (ps *PsqlStorage) Insert(ctx context.Context, user models.User) error {
 	}
 
 	_, err := ps.DB.ExecContext(ctx, `
-		INSERT INTO users (id, email, password, role, nick, description, birthday) 
+		INSERT INTO `+UsersTableName+` (id, email, password, role, nick, description, birthday) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7);`, user.Id, user.Email, user.Password, user.Role, user.Nick, user.Description, user.Birthday)
 
 	if err != nil {
@@ -165,7 +167,7 @@ func (ps *PsqlStorage) Update(ctx context.Context, uid uuid.UUID, user models.Us
 	}
 
 	result, err := ps.DB.ExecContext(ctx, `
-		UPDATE users 
+		UPDATE `+UsersTableName+` 
 		SET email = $1, password = $2, role = $3, nick = $4, description = $5, birthday = $6 
 		WHERE id = $7;`,
 		user.Email, user.Password, user.Role, user.Nick, user.Description, user.Birthday, uid)
@@ -212,7 +214,7 @@ func (ps *PsqlStorage) Delete(ctx context.Context, uid uuid.UUID) (models.User, 
 	}
 
 	_, err = ps.DB.ExecContext(ctx, `
-		DELETE FROM users 
+		DELETE FROM `+UsersTableName+` 
 		WHERE id = $1;
 	`, uid)
 	if err != nil {

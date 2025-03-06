@@ -20,7 +20,7 @@ type App struct {
 func New(log *slog.Logger, userManService usersservice.UsersManager, port int) *App {
 	gRPCServer := grpc.NewServer()
 
-	usermanage.Register(gRPCServer, userManService)
+	usermanage.Register(gRPCServer, userManService, log)
 
 	return &App{
 		log:        log,

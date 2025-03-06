@@ -44,10 +44,12 @@ services:
     container_name: user_service
     networks:
       - work_net
+    ports:
+      - "6001:50051"
     depends_on:
       - psql
     environment:
-      - DATABASE_URL=postgres://postgres:123@psql:5432/postgres?sslmode=disable
+      - DATABASE_URL=postgres://postgres:123@psql:5432/redhub?sslmode=disable
 
   article_service:
     build: 

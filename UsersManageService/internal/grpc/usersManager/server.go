@@ -74,7 +74,7 @@ func (s *serverAPI) GetUserById(ctx context.Context, req *umv1.GetUserByIdReques
 	}
 
 	id_s := req.GetId()
-	if id_s != "" {
+	if id_s == "" {
 		log.Error("Failed to get id", sl.Err(errors.New("required parametr id")))
 		return nil, status.Error(codes.InvalidArgument, "required parametr id")
 	}
