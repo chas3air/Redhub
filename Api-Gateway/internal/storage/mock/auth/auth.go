@@ -25,13 +25,13 @@ func (a *MockAuth) Login(ctx context.Context, email string, password string, app
 		}
 	}
 
-	return uuid.Nil.String(), storage.ErrUserNotFound
+	return uuid.Nil.String(), storage.ErrNotFound
 }
 
 func (a *MockAuth) Register(ctx context.Context, user models.User) (err error) {
 	for _, v := range a.users {
 		if v.Email == user.Email && v.Password == user.Password {
-			return storage.ErrUserExists
+			return storage.ErrAlreadyExists
 		}
 	}
 
@@ -46,5 +46,5 @@ func (a *MockAuth) IsAdmin(ctx context.Context, userID uuid.UUID) (isAdmin bool,
 		}
 	}
 
-	return false, storage.ErrUserNotFound
+	return false, storage.ErrNotFound
 }

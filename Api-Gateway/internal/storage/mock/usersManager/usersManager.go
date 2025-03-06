@@ -31,7 +31,7 @@ func (m *MockStorage) GetUsers(ctx context.Context) ([]models.User, error) {
 func (m *MockStorage) GetUserById(ctx context.Context, id uuid.UUID) (models.User, error) {
 	user, exists := m.users[id]
 	if !exists {
-		return models.User{}, storage.ErrUserNotFound
+		return models.User{}, storage.ErrNotFound
 	}
 	return user, nil
 }
@@ -44,13 +44,13 @@ func (m *MockStorage) GetUserByEmail(ctx context.Context, email string) (models.
 		}
 	}
 
-	return models.User{}, storage.ErrUserNotFound
+	return models.User{}, storage.ErrNotFound
 }
 
 // Insert implements storage.Storage.
 func (m *MockStorage) Insert(ctx context.Context, user models.User) error {
 	if _, exists := m.users[user.Id]; exists {
-		return storage.ErrUserExists
+		return storage.ErrAlreadyExists
 	}
 	m.users[user.Id] = user
 	return nil
@@ -59,7 +59,7 @@ func (m *MockStorage) Insert(ctx context.Context, user models.User) error {
 // Update implements storage.Storage.
 func (m *MockStorage) Update(ctx context.Context, id uuid.UUID, user models.User) error {
 	if _, exists := m.users[id]; !exists {
-		return storage.ErrUserNotFound
+		return storage.ErrNotFound
 	}
 	m.users[id] = user
 	return nil
@@ -69,7 +69,7 @@ func (m *MockStorage) Update(ctx context.Context, id uuid.UUID, user models.User
 func (m *MockStorage) Delete(ctx context.Context, id uuid.UUID) (models.User, error) {
 	user, exists := m.users[id]
 	if !exists {
-		return models.User{}, storage.ErrUserNotFound
+		return models.User{}, storage.ErrNotFound
 	}
 	delete(m.users, id)
 	return user, nil

@@ -121,6 +121,12 @@ func (uc *UsersController) Insert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.Id == uuid.Nil {
+		log.Error("Empty request body", sl.Err(errors.New("bad request")))
+		http.Error(w, "Empty request body", http.StatusBadRequest)
+		return
+	}
+
 	if err := uc.usersService.Insert(r.Context(), user); err != nil {
 		uc.handleError(w, err, log)
 		return

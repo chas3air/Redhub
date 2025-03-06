@@ -3,6 +3,7 @@ package usersmanagerstorage
 import (
 	"apigateway/internal/domain/models"
 	umprofiles "apigateway/internal/domain/profiles/um_profiles"
+	storage_error "apigateway/internal/storage"
 	"apigateway/pkg/lib/logger/sl"
 	"context"
 	"fmt"
@@ -154,28 +155,31 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 	default:
 	}
 
+	userForInsert, err := umprofiles.UsrToProtoUsr(user)
+	if err != nil {
+		log.Error("Wrong structure, failed to customize")
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", u.ServiceHost, u.ServicePort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		log.Error("failed to connect to gRPC server", sl.Err(err))
+		log.Error("Failed to connect to gRPC server", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
 
 	c := umv1.NewUsersManagerClient(conn)
-	userForInsert, err := umprofiles.UsrToProtoUsr(user)
-	if err != nil {
-		log.Warn("failed to convert model user to proto user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
-	}
-
 	_, err = c.Insert(ctx, &umv1.InsertRequest{
 		User: userForInsert,
 	})
 	if err != nil {
-		log.Warn("failed to insert user", sl.Err(err))
+		log.Warn("User already exists", sl.Err(err))
+		return fmt.Errorf("%s: %w", op, storage_error.ErrAlreadyExists)
+
+		log.Warn("Failed to insert user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -214,6 +218,7 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 		Id:   uid.String(),
 		User: userForUpdate,
 	})
+
 	if err != nil {
 		log.Warn("failed to update user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
