@@ -9,6 +9,7 @@ Names of branches:
     8. fix-secret-store: fix storing clients secrets
     9. task-addArticleClient: add article client to article service
     10. fix-UserManageService: fix users client and usersmanageservice
+    11. task-commentManageService: create CommentsManageService
     
 
 

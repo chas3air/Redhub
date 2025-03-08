@@ -27,3 +27,4 @@ go.work.sum
 TODO.md
 scheme.drawio
 db.sql
+stats.py
