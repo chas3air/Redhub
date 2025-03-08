@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	github.com/chas3air/protos v0.3.5
+	github.com/chas3air/protos v0.3.6
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-jwt/jwt/v5 v5.2.1

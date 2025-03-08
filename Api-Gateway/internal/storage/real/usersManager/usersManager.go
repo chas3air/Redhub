@@ -3,7 +3,6 @@ package usersmanagerstorage
 import (
 	"apigateway/internal/domain/models"
 	umprofiles "apigateway/internal/domain/profiles/um_profiles"
-	storage_error "apigateway/internal/storage"
 	"apigateway/pkg/lib/logger/sl"
 	"context"
 	"fmt"
@@ -176,10 +175,7 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 		User: userForInsert,
 	})
 	if err != nil {
-		log.Warn("User already exists", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, storage_error.ErrAlreadyExists)
-
-		log.Warn("Failed to insert user", sl.Err(err))
+		log.Error("Failed to insert user", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 

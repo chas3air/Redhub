@@ -10,6 +10,7 @@ Names of branches:
     9. task-addArticleClient: add article client to article service
     10. fix-UserManageService: fix users client and usersmanageservice
     11. task-commentManageService: create CommentsManageService
+    12. task-addCommentToAG: add commentManService to api-gateway
     
 
 

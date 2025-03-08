@@ -62,6 +62,19 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:123@psql:5432/redhub?sslmode=disable
 
+  comment_service:
+    build: 
+      context: ./CommentsManageService
+    container_name: comment_service
+    networks:
+      - work_net
+    ports:
+      - "6004:50051"
+    depends_on:
+      - psql
+    environment:
+      - DATABASE_URL=postgres://postgres:123@psql:5432/redhub?sslmode=disable
+
   psql:
     image: postgres:latest
     container_name: psql
