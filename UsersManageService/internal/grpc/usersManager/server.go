@@ -170,7 +170,7 @@ func (s *serverAPI) Insert(ctx context.Context, req *umv1.InsertRequest) (*umv1.
 		return nil, status.Error(codes.InvalidArgument, "wrong structure")
 	}
 
-	err = s.userManager.Insert(ctx, parsedUser)
+	_, err = s.userManager.Insert(ctx, parsedUser)
 	if err != nil {
 		if errors.Is(err, services.ErrAlreadyExists) {
 			log.Warn("User already exists", sl.Err(err))
@@ -181,7 +181,9 @@ func (s *serverAPI) Insert(ctx context.Context, req *umv1.InsertRequest) (*umv1.
 		return nil, status.Error(codes.InvalidArgument, "failed to insert user")
 	}
 
-	return nil, nil
+	return &umv1.InsertResponse{
+		User: req.GetUser(),
+	}, nil
 }
 
 func (s *serverAPI) Update(ctx context.Context, req *umv1.UpdateRequest) (*umv1.UpdateResponse, error) {
@@ -218,7 +220,7 @@ func (s *serverAPI) Update(ctx context.Context, req *umv1.UpdateRequest) (*umv1.
 		return nil, status.Error(codes.InvalidArgument, "Invalid id, must be uuid")
 	}
 
-	err = s.userManager.Update(ctx, parsedUUID, parsedUser)
+	_, err = s.userManager.Update(ctx, parsedUUID, parsedUser)
 	if err != nil {
 		if errors.Is(err, services.ErrNotFound) {
 			log.Warn("User with current id not found", sl.Err(err))
@@ -229,7 +231,9 @@ func (s *serverAPI) Update(ctx context.Context, req *umv1.UpdateRequest) (*umv1.
 		return nil, status.Error(codes.Internal, "failed to update user")
 	}
 
-	return nil, nil
+	return &umv1.UpdateResponse{
+		User: req.GetUser(),
+	}, nil
 }
 
 func (s *serverAPI) Delete(ctx context.Context, req *umv1.DeleteRequest) (*umv1.DeleteResponse, error) {

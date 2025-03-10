@@ -130,7 +130,7 @@ func (s *PsqlStorage) GetArticlesByOwnerId(ctx context.Context, uid uuid.UUID) (
 	return articles, nil
 }
 
-func (s *PsqlStorage) Insert(ctx context.Context, article models.Article) error {
+func (s *PsqlStorage) Insert(ctx context.Context, article models.Article) (models.Article, error) {
 	const op = "psql.insert"
 	log := s.log.With(
 		slog.String("op", op),
@@ -144,17 +144,17 @@ func (s *PsqlStorage) Insert(ctx context.Context, article models.Article) error 
 	if err != nil {
 		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
 			log.Error("Article with this ID already exists", sl.Err(err))
-			return fmt.Errorf("%s: %w", op, storage.ErrAlreadyExists)
+			return models.Article{}, fmt.Errorf("%s: %w", op, storage.ErrAlreadyExists)
 		}
 
 		log.Error("Error inserting article", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return article, nil
 }
 
-func (s *PsqlStorage) Update(ctx context.Context, aid uuid.UUID, article models.Article) error {
+func (s *PsqlStorage) Update(ctx context.Context, aid uuid.UUID, article models.Article) (models.Article, error) {
 	const op = "psql.update"
 	log := s.log.With(
 		slog.String("op", op),
@@ -168,21 +168,21 @@ func (s *PsqlStorage) Update(ctx context.Context, aid uuid.UUID, article models.
 	`, article.Title, article.Content, aid)
 	if err != nil {
 		log.Error("Error updating article", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		log.Error("Error get rows affected", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	if rowsAffected == 0 {
 		log.Error("Zero rows affected")
-		return fmt.Errorf("%s: %w", op, storage.ErrNotFound)
+		return models.Article{}, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
 	}
 
-	return nil
+	return article, nil
 }
 
 func (s *PsqlStorage) Delete(ctx context.Context, aid uuid.UUID) (models.Article, error) {

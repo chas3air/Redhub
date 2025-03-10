@@ -90,7 +90,7 @@ func (a *ArticleManageService) GetArticleByOwnerId(ctx context.Context, uid uuid
 }
 
 // Insert implements articles.IArticlesService.
-func (a *ArticleManageService) Insert(ctx context.Context, article models.Article) error {
+func (a *ArticleManageService) Insert(ctx context.Context, article models.Article) (models.Article, error) {
 	const op = "services.articleManager.insert"
 	log := a.log.With(
 		slog.String("op", op),
@@ -98,21 +98,21 @@ func (a *ArticleManageService) Insert(ctx context.Context, article models.Articl
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.Article{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
-	err := a.storage.Insert(ctx, article)
+	article, err := a.storage.Insert(ctx, article)
 	if err != nil {
 		log.Error("failed to insert article", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return article, nil
 }
 
 // Update implements articles.IArticlesService.
-func (a ArticleManageService) Update(ctx context.Context, aid uuid.UUID, article models.Article) error {
+func (a ArticleManageService) Update(ctx context.Context, aid uuid.UUID, article models.Article) (models.Article, error) {
 	const op = "services.articleManager.update"
 	log := a.log.With(
 		slog.String("op", op),
@@ -120,17 +120,17 @@ func (a ArticleManageService) Update(ctx context.Context, aid uuid.UUID, article
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.Article{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
-	err := a.storage.Update(ctx, aid, article)
+	article, err := a.storage.Update(ctx, aid, article)
 	if err != nil {
 		log.Error("failed to update article", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return article, nil
 }
 
 // Delete implements articles.IArticlesService.

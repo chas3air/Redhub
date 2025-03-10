@@ -96,54 +96,54 @@ func (am *ArticleManager) GetArticleByOwnerId(ctx context.Context, uid uuid.UUID
 }
 
 // Insert implements articlesservice.ArticlesManager.
-func (am *ArticleManager) Insert(ctx context.Context, article models.Article) error {
+func (am *ArticleManager) Insert(ctx context.Context, article models.Article) (models.Article, error) {
 	const op = "services.articleManager.insert"
 	log := am.log.With(slog.String("operation", op))
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.Article{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
-	err := am.storage.Insert(ctx, article)
+	article, err := am.storage.Insert(ctx, article)
 	if err != nil {
 		if errors.Is(err, storage_error.ErrAlreadyExists) {
 			log.Error("Article already exists", sl.Err(err))
-			return fmt.Errorf("%s: %w", op, services.ErrAlreadyExists)
+			return models.Article{}, fmt.Errorf("%s: %w", op, services.ErrAlreadyExists)
 		}
 
 		log.Error("Error inserting article", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("Successfully inserted article")
-	return nil
+	return article, nil
 }
 
 // Update implements articlesservice.ArticlesManager.
-func (am *ArticleManager) Update(ctx context.Context, aid uuid.UUID, article models.Article) error {
+func (am *ArticleManager) Update(ctx context.Context, aid uuid.UUID, article models.Article) (models.Article, error) {
 	const op = "services.articleManager.update"
 	log := am.log.With(slog.String("operation", op))
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.Article{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
-	err := am.storage.Update(ctx, aid, article)
+	article, err := am.storage.Update(ctx, aid, article)
 	if err != nil {
 		if errors.Is(err, storage_error.ErrNotFound) {
 			log.Error("Article not found for update", sl.Err(err))
-			return fmt.Errorf("%s: %w", op, services.ErrNotFound)
+			return models.Article{}, fmt.Errorf("%s: %w", op, services.ErrNotFound)
 		}
 
 		log.Error("Error updating article", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 	log.Info("Successfully updated article")
-	return nil
+	return article, nil
 }
 
 // Delete implements articlesservice.ArticlesManager.

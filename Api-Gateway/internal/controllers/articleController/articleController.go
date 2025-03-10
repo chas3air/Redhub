@@ -128,7 +128,7 @@ func (ac *ArticleController) Insert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := ac.articleService.Insert(r.Context(), article); err != nil {
+	if _, err := ac.articleService.Insert(r.Context(), article); err != nil {
 		ac.handleError(w, err, log)
 		return
 	}
@@ -156,7 +156,7 @@ func (ac *ArticleController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := ac.articleService.Update(r.Context(), article_id, article); err != nil {
+	if _, err := ac.articleService.Update(r.Context(), article_id, article); err != nil {
 		ac.handleError(w, err, log)
 		return
 	}

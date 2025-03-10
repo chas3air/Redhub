@@ -11,12 +11,8 @@ Names of branches:
     10. fix-UserManageService: fix users client and usersmanageservice
     11. task-commentManageService: create CommentsManageService
     12. task-addCommentToAG: add commentManService to api-gateway
-    
+    13. fix-UAprotos: fix users and articles proto to return obj in insert and update
 
 
 Tasks:
     нужно сделать базу данных которая будет хранить клиентов их id и секреты. сделать какую-нибудь простую апиху которая регает их. таску оставлю на завтра. Тогда же напишу мидлваер на валидацию зареганый пользователей и нет, и раскидаю права.
-
-
-Что на завтра:
-    И посмотреть что можно сделать с комментариями.

@@ -127,7 +127,7 @@ func (uc *UsersController) Insert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := uc.usersService.Insert(r.Context(), user); err != nil {
+	if _, err := uc.usersService.Insert(r.Context(), user); err != nil {
 		uc.handleError(w, err, log)
 		return
 	}
@@ -155,7 +155,7 @@ func (uc *UsersController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := uc.usersService.Update(r.Context(), uuidID, user); err != nil {
+	if _, err := uc.usersService.Update(r.Context(), uuidID, user); err != nil {
 		uc.handleError(w, err, log)
 		return
 	}
@@ -182,9 +182,8 @@ func (uc *UsersController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		log.Error("Failed to encode response", sl.Err(err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)

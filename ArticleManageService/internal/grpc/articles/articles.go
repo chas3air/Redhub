@@ -175,7 +175,7 @@ func (s *serverAPI) InsertArticle(ctx context.Context, req *amv1.InsertArticleRe
 		return nil, status.Error(codes.InvalidArgument, "failed to customize")
 	}
 
-	err = s.articlesManager.Insert(ctx, app_article)
+	_, err = s.articlesManager.Insert(ctx, app_article)
 	if err != nil {
 		if errors.Is(err, services.ErrAlreadyExists) {
 			log.Warn("Article already exists", sl.Err(err))
@@ -186,7 +186,9 @@ func (s *serverAPI) InsertArticle(ctx context.Context, req *amv1.InsertArticleRe
 		return nil, status.Error(codes.Internal, "failed to insert article")
 	}
 
-	return &amv1.InsertArticleResponse{}, nil
+	return &amv1.InsertArticleResponse{
+		Article: req.GetArticle(),
+	}, nil
 }
 
 // UpdateArticle implements amv1.ArticlesManagerServer.
@@ -221,7 +223,7 @@ func (s *serverAPI) UpdateArticle(ctx context.Context, req *amv1.UpdateArticleRe
 
 	app_article := models.Article{Title: req.Article.Title, Content: req.Article.Content}
 
-	err = s.articlesManager.Update(ctx, parseUUID, app_article)
+	_, err = s.articlesManager.Update(ctx, parseUUID, app_article)
 	if err != nil {
 		if errors.Is(err, services.ErrNotFound) {
 			log.Warn("Article with current id not found", sl.Err(err))
@@ -232,7 +234,9 @@ func (s *serverAPI) UpdateArticle(ctx context.Context, req *amv1.UpdateArticleRe
 		return nil, status.Error(codes.Internal, "failed to update article")
 	}
 
-	return &amv1.UpdateArticleResponse{}, nil
+	return &amv1.UpdateArticleResponse{
+		Article: req.GetArticle(),
+	}, nil
 }
 
 // DeleteArticle implements amv1.ArticlesManagerServer.

@@ -1,7 +1,7 @@
 package usersmanagerservice
 
 import (
-	"apigateway/internal/domain/interfaces"
+	"apigateway/internal/domain/interfaces/users"
 	"apigateway/internal/domain/models"
 	"apigateway/pkg/lib/logger/sl"
 	"context"
@@ -13,10 +13,10 @@ import (
 
 type UsersManager struct {
 	log     *slog.Logger
-	storage interfaces.UsersStorage
+	storage users.UsersStorage
 }
 
-func New(log *slog.Logger, storage interfaces.UsersStorage) *UsersManager {
+func New(log *slog.Logger, storage users.UsersStorage) *UsersManager {
 	return &UsersManager{
 		log:     log,
 		storage: storage,
@@ -68,34 +68,34 @@ func (um *UsersManager) GetUserByEmail(ctx context.Context, email string) (model
 	return user, nil
 }
 
-func (um *UsersManager) Insert(ctx context.Context, user models.User) error {
+func (um *UsersManager) Insert(ctx context.Context, user models.User) (models.User, error) {
 	const op = "services.usersManager.insert"
 	log := um.log.With(
 		slog.String("op", op),
 	)
 
-	err := um.storage.Insert(ctx, user)
+	user, err := um.storage.Insert(ctx, user)
 	if err != nil {
 		log.Error("error inserting user", sl.Err(err))
-		return err
+		return models.User{}, err
 	}
 
-	return nil
+	return user, nil
 }
 
-func (um *UsersManager) Update(ctx context.Context, uid uuid.UUID, user models.User) error {
+func (um *UsersManager) Update(ctx context.Context, uid uuid.UUID, user models.User) (models.User, error) {
 	const op = "services.usersManager.update"
 	log := um.log.With(
 		slog.String("op", op),
 	)
 
-	err := um.storage.Update(ctx, uid, user)
+	user, err := um.storage.Update(ctx, uid, user)
 	if err != nil {
 		log.Error("error updating user", sl.Err(err))
-		return err
+		return models.User{}, err
 	}
 
-	return nil
+	return user, nil
 }
 
 func (um *UsersManager) Delete(ctx context.Context, uid uuid.UUID) (models.User, error) {

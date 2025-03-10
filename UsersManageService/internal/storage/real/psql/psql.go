@@ -125,7 +125,7 @@ func (ps *PsqlStorage) GetUserByEmail(ctx context.Context, email string) (models
 	return user, nil
 }
 
-func (ps *PsqlStorage) Insert(ctx context.Context, user models.User) error {
+func (ps *PsqlStorage) Insert(ctx context.Context, user models.User) (models.User, error) {
 	const op = "storage.psql.insert"
 	log := ps.log.With(
 		slog.String("op", op),
@@ -133,7 +133,7 @@ func (ps *PsqlStorage) Insert(ctx context.Context, user models.User) error {
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -144,17 +144,17 @@ func (ps *PsqlStorage) Insert(ctx context.Context, user models.User) error {
 	if err != nil {
 		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
 			log.Error("User with this ID already exists", sl.Err(err))
-			return fmt.Errorf("%s: %w", op, storage.ErrAlreadyExists)
+			return models.User{}, fmt.Errorf("%s: %w", op, storage.ErrAlreadyExists)
 		}
 
 		log.Error("Error inserting user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return user, nil
 }
 
-func (ps *PsqlStorage) Update(ctx context.Context, uid uuid.UUID, user models.User) error {
+func (ps *PsqlStorage) Update(ctx context.Context, uid uuid.UUID, user models.User) (models.User, error) {
 	const op = "storage.psql.update"
 	log := ps.log.With(
 		slog.String("op", op),
@@ -162,7 +162,7 @@ func (ps *PsqlStorage) Update(ctx context.Context, uid uuid.UUID, user models.Us
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -173,21 +173,21 @@ func (ps *PsqlStorage) Update(ctx context.Context, uid uuid.UUID, user models.Us
 		user.Email, user.Password, user.Role, user.Nick, user.Description, user.Birthday, uid)
 	if err != nil {
 		log.Error("Error updating user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		log.Error("Error get rows affected", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	if rowsAffected == 0 {
 		log.Error("Zero rows affected")
-		return fmt.Errorf("%s: %w", op, storage.ErrNotFound)
+		return models.User{}, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
 	}
 
-	return nil
+	return user, nil
 }
 
 func (ps *PsqlStorage) Delete(ctx context.Context, uid uuid.UUID) (models.User, error) {

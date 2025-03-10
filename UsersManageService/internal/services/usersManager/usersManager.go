@@ -98,54 +98,54 @@ func (um *UserManager) GetUserByEmail(ctx context.Context, email string) (models
 	return user, nil
 }
 
-func (um *UserManager) Insert(ctx context.Context, user models.User) error {
+func (um *UserManager) Insert(ctx context.Context, user models.User) (models.User, error) {
 	const op = "services.userManager.Insert"
 	log := um.log.With(slog.String("operation", op))
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
-	err := um.storage.Insert(ctx, user)
+	user, err := um.storage.Insert(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage_errors.ErrAlreadyExists) {
 			log.Warn("User already exists", sl.Err(err))
-			return fmt.Errorf("%s: %w", op, services.ErrAlreadyExists)
+			return models.User{}, fmt.Errorf("%s: %w", op, services.ErrAlreadyExists)
 		}
 
 		log.Error("Failed to insert user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("User inserted successfully")
-	return nil
+	return user, nil
 }
 
-func (um *UserManager) Update(ctx context.Context, uid uuid.UUID, user models.User) error {
+func (um *UserManager) Update(ctx context.Context, uid uuid.UUID, user models.User) (models.User, error) {
 	const op = "services.userManager.Update"
 	log := um.log.With(slog.String("operation", op))
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
-	err := um.storage.Update(ctx, uid, user)
+	user, err := um.storage.Update(ctx, uid, user)
 	if err != nil {
 		if errors.Is(err, storage_errors.ErrNotFound) {
 			log.Warn("User not found for update", sl.Err(err))
-			return fmt.Errorf("%s: %w", op, services.ErrNotFound)
+			return models.User{}, fmt.Errorf("%s: %w", op, services.ErrNotFound)
 		}
 
 		log.Error("Failed to update user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("User updated successfully")
-	return nil
+	return user, nil
 }
 
 func (um *UserManager) Delete(ctx context.Context, uid uuid.UUID) (models.User, error) {

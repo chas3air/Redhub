@@ -152,20 +152,20 @@ func (a *ArticlesManageStorage) GetArticleByOwnerId(ctx context.Context, uid uui
 }
 
 // Insert implements articles.IArticlesStorage.
-func (a *ArticlesManageStorage) Insert(ctx context.Context, article models.Article) error {
+func (a *ArticlesManageStorage) Insert(ctx context.Context, article models.Article) (models.Article, error) {
 	const op = "articlesmanagestorage.insert"
 	log := a.log.With(slog.String("op", op))
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.Article{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
 	articleForInsert, err := amprofiles.ArtToProtoArt(article)
 	if err != nil {
 		log.Error("Failed format of article", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	conn, err := grpc.NewClient(
@@ -174,7 +174,7 @@ func (a *ArticlesManageStorage) Insert(ctx context.Context, article models.Artic
 	)
 	if err != nil {
 		log.Error("Failed to connect to gRPC server", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
 
@@ -184,27 +184,27 @@ func (a *ArticlesManageStorage) Insert(ctx context.Context, article models.Artic
 	})
 	if err != nil {
 		log.Error("Failed to insert article:", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return article, nil
 }
 
 // Update implements articles.IArticlesStorage.
-func (a *ArticlesManageStorage) Update(ctx context.Context, aid uuid.UUID, article models.Article) error {
+func (a *ArticlesManageStorage) Update(ctx context.Context, aid uuid.UUID, article models.Article) (models.Article, error) {
 	const op = "articlesmanagestorage.update"
 	log := a.log.With(slog.String("op", op))
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.Article{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
 	articleForInsert, err := amprofiles.ArtToProtoArt(article)
 	if err != nil {
 		log.Error("Failed format of article", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	conn, err := grpc.NewClient(
@@ -213,7 +213,7 @@ func (a *ArticlesManageStorage) Update(ctx context.Context, aid uuid.UUID, artic
 	)
 	if err != nil {
 		log.Error("Failed to connect to gRPC server", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
 
@@ -224,10 +224,10 @@ func (a *ArticlesManageStorage) Update(ctx context.Context, aid uuid.UUID, artic
 	})
 	if err != nil {
 		log.Error("Failed to update article", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.Article{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return article, nil
 }
 
 // Delete implements articles.IArticlesStorage.
