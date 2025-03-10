@@ -6,6 +6,9 @@ usersStoragePort: 50051
 articlesStorageHost: "article_service"
 articlesStoragePort: 50051
 
+commentsStorageHost: "comment_service"
+commentsStoragePort: 50051
+
 authHost: "auth"
 authPost: 50051
 

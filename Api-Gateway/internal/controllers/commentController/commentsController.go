@@ -1,4 +1,4 @@
-package commentcontroller
+package commentsmanagercontroller
 
 import (
 	"apigateway/internal/domain/interfaces/comments"

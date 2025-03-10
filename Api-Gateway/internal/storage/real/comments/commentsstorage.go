@@ -1,4 +1,4 @@
-package commentsstorage
+package commentsmanagerstorage
 
 import (
 	"apigateway/internal/domain/models"

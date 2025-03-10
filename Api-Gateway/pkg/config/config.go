@@ -10,14 +10,21 @@ import (
 )
 
 type Config struct {
-	Env                 string    `yaml:"env" env-default:"local"`
-	UsersStorageHost    string    `yaml:"usersStorageHost" env-default:"user_service"`
-	UsersStoragePort    int       `yaml:"usersStoragePort" env-default:"50051"`
-	ArticlesStorageHost string    `yaml:"articlesStorageHost" env-default:"user_service"`
-	ArticlesStoragePort int       `yaml:"articlesStoragePort" env-default:"50051"`
-	AuthHost            string    `yaml:"authHost" env-default:"auth"`
-	AuthPort            int       `yaml:"authPost" env-default:"50051"`
-	API                 APIConfig `yaml:"api"`
+	Env string `yaml:"env" env-default:"local"`
+
+	UsersStorageHost string `yaml:"usersStorageHost" env-default:"user_service"`
+	UsersStoragePort int    `yaml:"usersStoragePort" env-default:"50051"`
+
+	ArticlesStorageHost string `yaml:"articlesStorageHost" env-default:"user_service"`
+	ArticlesStoragePort int    `yaml:"articlesStoragePort" env-default:"50051"`
+
+	AuthHost string `yaml:"authHost" env-default:"auth"`
+	AuthPort int    `yaml:"authPost" env-default:"50051"`
+
+	CommentsStorageHost string `yaml:"commentsStorageHost" env-defaul:"comments_service"`
+	CommentsStoragePort int    `yaml:"commentsStoragePort" env-defaul:"50051"`
+
+	API APIConfig `yaml:"api"`
 }
 
 type APIConfig struct {

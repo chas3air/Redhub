@@ -1,4 +1,4 @@
-package commentsservice
+package commentsmanagerservice
 
 import (
 	"apigateway/internal/domain/interfaces/comments"
