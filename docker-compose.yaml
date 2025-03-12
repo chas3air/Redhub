@@ -7,16 +7,16 @@ volumes:
 
 
 services:
-  # nginx:
-  #   build:
-  #     context: ./Nginx
-  #   container_name: nginx
-  #   ports:
-  #     - "80:80"
-  #   networks:
-  #     - work_net
-  #   depends_on:
-  #     - api-gateway
+  nginx:
+    build:
+      context: ./Nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    networks:
+      - work_net
+    depends_on:
+      - api-gateway
 
   api-gateway:
     build: 
@@ -44,7 +44,7 @@ services:
       - user_service
 
   user_service:
-    build: 
+    build:
       context: ./UsersManageService
     container_name: user_service
     networks:
@@ -92,4 +92,5 @@ services:
     environment:
       POSTGRES_PASSWORD: 123
     volumes:
-      - redhub_volume:/var/lib/postgresql/data
+    - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    - redhub_volume:/var/lib/postgresql/data
