@@ -2,7 +2,9 @@ package authcontroller
 
 import (
 	"apigateway/internal/domain/models"
+	tokenparser "apigateway/internal/lib/jwt/tokenParser"
 	authservice "apigateway/internal/services/auth"
+	"apigateway/internal/storage/cache"
 	"apigateway/pkg/lib/logger/sl"
 	"context"
 	"encoding/json"
@@ -10,6 +12,8 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 type AuthController struct {
@@ -72,7 +76,10 @@ func (ac *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = refreshToken
+	cache := cache.New()
+	claimsFromToken, _ := tokenparser.ParseToken(accessToken)
+	parsedUIDToUUID, _ := uuid.Parse(claimsFromToken.Uid)
+	cache.Add(parsedUIDToUUID, refreshToken)
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(accessToken))
@@ -90,6 +97,7 @@ func (ac *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user.Role = "user"
 	if err := ac.auth_service.Register(r.Context(), user); err != nil {
 		ac.handleError(w, err, log)
 		return

@@ -13,7 +13,12 @@ import (
 )
 
 func main() {
-	godotenv.Load()
+	err := godotenv.Load("/app/.env")
+	if err != nil {
+		pwd, _ := os.Getwd()
+		panic(pwd)
+	}
+
 	cfg := config.MustLoad()
 	log := logger.SetupLogger(cfg.Env)
 

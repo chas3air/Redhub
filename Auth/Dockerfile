@@ -17,6 +17,7 @@ RUN apk --no-cache add ca-certificates tzdata
 
 RUN mkdir /app
 COPY --from=build /src /app
+COPY .env /app/
 
 RUN mv /app/cli /cli
 

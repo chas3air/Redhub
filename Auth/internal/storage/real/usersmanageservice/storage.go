@@ -144,13 +144,13 @@ func (u *UsersManageService) GetUserByEmail(ctx context.Context, email string) (
 }
 
 // Insert implements interfaces.UsersStorage.
-func (u *UsersManageService) Insert(ctx context.Context, user models.User) error {
+func (u *UsersManageService) Insert(ctx context.Context, user models.User) (models.User, error) {
 	const op = "usersmanageservice.insert"
 	log := u.log.With(slog.String("op", op))
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -160,7 +160,7 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 	)
 	if err != nil {
 		log.Error("failed to connect to gRPC server", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
 
@@ -168,7 +168,7 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 	userForInsert, err := umprofiles.UsrToProtoUsr(user)
 	if err != nil {
 		log.Warn("failed to convert model user to proto user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	_, err = c.Insert(ctx, &umv1.InsertRequest{
@@ -176,20 +176,20 @@ func (u *UsersManageService) Insert(ctx context.Context, user models.User) error
 	})
 	if err != nil {
 		log.Warn("failed to insert user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return user, nil
 }
 
 // Update implements interfaces.UsersStorage.
-func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user models.User) error {
+func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user models.User) (models.User, error) {
 	const op = "usersmanageservice.update"
 	log := u.log.With(slog.String("op", op))
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
@@ -199,7 +199,7 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 	)
 	if err != nil {
 		log.Error("failed to connect to gRPC server", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 	defer conn.Close()
 
@@ -207,7 +207,7 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 	userForUpdate, err := umprofiles.UsrToProtoUsr(user)
 	if err != nil {
 		log.Warn("failed to convert model user to proto user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	_, err = c.Update(ctx, &umv1.UpdateRequest{
@@ -216,10 +216,10 @@ func (u *UsersManageService) Update(ctx context.Context, uid uuid.UUID, user mod
 	})
 	if err != nil {
 		log.Warn("failed to update user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return user, nil
 }
 
 // Delete implements interfaces.UsersStorage.

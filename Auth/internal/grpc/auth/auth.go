@@ -72,7 +72,7 @@ func (s *serverAPI) Register(ctx context.Context, in *authv1.RegisterRequest) (*
 		return nil, status.Error(codes.InvalidArgument, "not all user fields are feeled")
 	}
 
-	err = s.auth.Register(ctx, user)
+	_, err = s.auth.Register(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
@@ -80,7 +80,9 @@ func (s *serverAPI) Register(ctx context.Context, in *authv1.RegisterRequest) (*
 		return nil, status.Error(codes.Internal, "failed to register user")
 	}
 
-	return nil, nil
+	return &authv1.RegisterResponse{
+		User: in.GetUser(),
+	}, nil
 }
 
 func (s *serverAPI) IsAdmin(ctx context.Context, in *authv1.IsAdminRequest) (*authv1.IsAdminResponse, error) {

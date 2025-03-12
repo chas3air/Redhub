@@ -77,7 +77,7 @@ func (a AuthService) Login(ctx context.Context, email string, password string) (
 }
 
 // Register implements interfaces.Auth.
-func (a AuthService) Register(ctx context.Context, user models.User) (err error) {
+func (a AuthService) Register(ctx context.Context, user models.User) (models.User, error) {
 	const op = "service.auth.register"
 	log := a.log.With(
 		slog.String("op", op),
@@ -86,26 +86,26 @@ func (a AuthService) Register(ctx context.Context, user models.User) (err error)
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("%s: %w", op, ctx.Err())
+		return models.User{}, fmt.Errorf("%s: %w", op, ctx.Err())
 	default:
 	}
 
-	err = a.usersstorage.Insert(ctx, user)
+	user, err := a.usersstorage.Insert(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
 			log.Warn("user already exists", sl.Err(err))
-			return fmt.Errorf("%s: %w", op, err)
+			return models.User{}, fmt.Errorf("%s: %w", op, err)
 		}
 
 		log.Error("failed to save user", sl.Err(err))
-		return fmt.Errorf("%s: %w", op, err)
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return nil
+	return user, nil
 }
 
 // IsAdmin implements interfaces.Auth.
-func (a AuthService) IsAdmin(ctx context.Context, user_id uuid.UUID) (isAdmin bool, err error) {
+func (a AuthService) IsAdmin(ctx context.Context, user_id uuid.UUID) (bool, error) {
 	const op = "service.auth.isAdmin"
 	log := a.log.With(
 		slog.String("op", op),

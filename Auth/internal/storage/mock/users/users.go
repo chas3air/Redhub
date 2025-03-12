@@ -60,21 +60,21 @@ func (m *MockStorage) GetUserByEmail(ctx context.Context, email string) (models.
 }
 
 // Insert implements storage.Storage.
-func (m *MockStorage) Insert(ctx context.Context, user models.User) error {
+func (m *MockStorage) Insert(ctx context.Context, user models.User) (models.User, error) {
 	if _, exists := m.users[user.Id]; exists {
-		return storage.ErrUserExists
+		return models.User{}, storage.ErrUserExists
 	}
 	m.users[user.Id] = user
-	return nil
+	return user, nil
 }
 
 // Update implements storage.Storage.
-func (m *MockStorage) Update(ctx context.Context, id uuid.UUID, user models.User) error {
+func (m *MockStorage) Update(ctx context.Context, id uuid.UUID, user models.User) (models.User, error) {
 	if _, exists := m.users[id]; !exists {
-		return storage.ErrUserNotFound
+		return models.User{}, storage.ErrUserNotFound
 	}
 	m.users[id] = user
-	return nil
+	return user, nil
 }
 
 // Delete implements storage.Storage.

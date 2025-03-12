@@ -2,41 +2,24 @@ package tokenparser
 
 import (
 	"apigateway/internal/domain/models"
-	"fmt"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func ParseToken(tokenString string, secretKey []byte) (*models.Claims, error) {
-	fmt.Println("Начинаем проверку токена...")
-
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return secretKey, nil
+func ParseToken(tokenString string) (*models.Claims, error) {
+	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return models.Claims{}, nil
 	})
 
-	if err != nil {
-		fmt.Println("Ошибка верификации токена:", err)
-		return nil, err
+	claims := token.Claims.(jwt.MapClaims)
+	exp := time.Unix(int64(claims["exp"].(float64)), 0)
+
+	customClaims := &models.Claims{
+		Uid:  claims["uid"].(string),
+		Role: claims["role"].(string),
+		Exp:  exp,
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println("Токен действителен. Извлекаем данные...")
-		customClaims := &models.Claims{
-			Uid:  claims["uid"].(string),
-			Role: claims["role"].(string),
-		}
-
-		// Отладочный вывод типа exp
-		expClaim := claims["exp"]
-		fmt.Printf("Тип exp: %T, значение: %v\n", expClaim, expClaim)
-
-		fmt.Println("Токен действителен. Данные:", customClaims)
-		return customClaims, nil
-	}
-
-	fmt.Println("Токен недействителен.")
-	return nil, fmt.Errorf("token is invalid")
+	return customClaims, nil
 }

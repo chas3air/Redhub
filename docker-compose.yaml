@@ -26,15 +26,22 @@ services:
       - 8080:8080
     networks:
       - work_net
+    depends_on:
+      - user_service
+      - article_service
+      - comment_service
+      - auth
 
-  # auth:
-  #   build: 
-  #     context: ./Auth
-  #   container_name: auth
-  #   networks:
-  #     - work_net
-  #   depends_on:
-  #     - user_service
+  auth:
+    build: 
+      context: ./Auth
+    container_name: auth
+    networks:
+      - work_net
+    ports:
+      - 6005:50051
+    depends_on:
+      - user_service
 
   user_service:
     build: 
