@@ -9,7 +9,7 @@ volumes:
 services:
   nginx:
     build:
-      context: ./Nginx
+      context: ./Core/Nginx
     container_name: nginx
     ports:
       - "80:80"
@@ -20,7 +20,7 @@ services:
 
   api-gateway:
     build: 
-      context: ./Api-Gateway
+      context: ./Core/Api-Gateway
     container_name: api-gateway
     ports:
       - 8080:8080
@@ -34,7 +34,7 @@ services:
 
   auth:
     build: 
-      context: ./Auth
+      context: ./Core/Auth
     container_name: auth
     networks:
       - work_net
@@ -45,7 +45,7 @@ services:
 
   user_service:
     build:
-      context: ./UsersManageService
+      context: ./Core/UsersManageService
     container_name: user_service
     networks:
       - work_net
@@ -58,7 +58,7 @@ services:
 
   article_service:
     build: 
-      context: ./ArticleManageService
+      context: ./Core/ArticleManageService
     container_name: article_service
     networks:
       - work_net
@@ -71,7 +71,7 @@ services:
 
   comment_service:
     build: 
-      context: ./CommentsManageService
+      context: ./Core/CommentsManageService
     container_name: comment_service
     networks:
       - work_net
