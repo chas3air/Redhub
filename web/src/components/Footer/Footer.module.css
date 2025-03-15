@@ -1,0 +1,23 @@
+.footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 40px;
+}
+
+.info {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+}
+
+.ul {
+    display: flex;
+    flex-direction: column;
+}
+
+.li {
+    display: flex;
+    margin: 10px;
+    justify-content: left;
+}

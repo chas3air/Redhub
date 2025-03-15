@@ -1,0 +1,9 @@
+.block {
+    display: flex;
+    flex-direction: column;
+    color: black;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
