@@ -62,6 +62,7 @@ func (a *App) Start() {
 	r.HandleFunc("/api/v1/health-check", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
+	r.Use(middleware.CORS)
 
 	// Группа для авторизации, не пропускает если пользователь уже существует
 	authRouter := r.PathPrefix("/api/v1").Subrouter()
