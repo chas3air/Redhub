@@ -59,15 +59,15 @@ func (a *App) Start() {
 	middleware := middleware.New()
 
 	r := mux.NewRouter()
+	r.Use(middleware.CORS)
 	r.HandleFunc("/api/v1/health-check", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	r.Use(middleware.CORS)
 
 	// Группа для авторизации, не пропускает если пользователь уже существует
 	authRouter := r.PathPrefix("/api/v1").Subrouter()
 	authRouter.Use(middleware.PreventAccessIfLoggedIn)
-	authRouter.HandleFunc("/login", authcontroller.Login).Methods(http.MethodPost)
+	authRouter.HandleFunc("/login", authcontroller.Login).Methods(http.MethodPost, http.MethodOptions)
 	authRouter.HandleFunc("/register", authcontroller.Register).Methods(http.MethodPost)
 
 	// Группа для работы с пользователями

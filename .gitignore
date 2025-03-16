@@ -28,3 +28,28 @@ TODO.md
 scheme.drawio
 db.sql
 stats.py
+
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/web/node_modules
+/web/.pnp
+/web.pnp.js
+
+# testing
+/web/coverage
+
+# production
+/web/build
+
+# misc
+/web.DS_Store
+/web.env.local
+/web.env.development.local
+/web.env.test.local
+/web.env.production.local
+
+/webnpm-debug.log*
+/webyarn-debug.log*
+/webyarn-error.log*

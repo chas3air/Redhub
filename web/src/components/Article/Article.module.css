@@ -6,4 +6,20 @@
     padding: 10px;
     border: 1px solid black;
     border-radius: 5px;
+    width: 100%;
+}
+
+.info {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    margin-bottom: 10px; /* Отступ снизу для разделения с заголовком */
+}
+
+h2 {
+    margin: 0; /* Убираем отступы у заголовка */
+}
+
+p {
+    margin: 5px;
 }
