@@ -5,6 +5,7 @@ import (
 	authcontroller "apigateway/internal/controllers/auth"
 	commentsmanagercontroller "apigateway/internal/controllers/commentController"
 	"apigateway/internal/controllers/middleware"
+	statscontroller "apigateway/internal/controllers/statsController"
 	userscontroller "apigateway/internal/controllers/usersManager"
 	articlemanageservice "apigateway/internal/services/articleManager"
 	authservice "apigateway/internal/services/auth"
@@ -41,19 +42,22 @@ func (a *App) Start() {
 	authcontroller := authcontroller.New(a.log, auth_service)
 
 	// Пачка для микросервиса пользователей
-	usersmanagerstorage := usersmanagerstorage.New(a.log, a.cfg.UsersStorageHost, a.cfg.UsersStoragePort)
-	usersmanager_service := usersmanagerservice.New(a.log, usersmanagerstorage)
+	usersmanager_storage := usersmanagerstorage.New(a.log, a.cfg.UsersStorageHost, a.cfg.UsersStoragePort)
+	usersmanager_service := usersmanagerservice.New(a.log, usersmanager_storage)
 	userscontroller := userscontroller.New(a.log, usersmanager_service)
 
 	// Пачка для микросервиса постов
-	articlemanagerstrorage := articlesmanagerstorage.New(a.log, a.cfg.ArticlesStorageHost, a.cfg.ArticlesStoragePort)
-	articlemanager_service := articlemanageservice.New(a.log, articlemanagerstrorage)
+	articlemanager_storage := articlesmanagerstorage.New(a.log, a.cfg.ArticlesStorageHost, a.cfg.ArticlesStoragePort)
+	articlemanager_service := articlemanageservice.New(a.log, articlemanager_storage)
 	articlecontroller := articlecontroller.New(a.log, articlemanager_service)
 
 	// Пачка для микросервиса комментариев
-	commentmanagerstorage := commentsmanagerstorage.New(a.log, a.cfg.CommentsStorageHost, a.cfg.CommentsStoragePort)
-	commentsmanagerservice := commentsmanagerservice.New(a.log, commentmanagerstorage)
-	commentsmanagercontroller := commentsmanagercontroller.New(a.log, commentsmanagerservice)
+	commentmanager_storage := commentsmanagerstorage.New(a.log, a.cfg.CommentsStorageHost, a.cfg.CommentsStoragePort)
+	commentsmanager_service := commentsmanagerservice.New(a.log, commentmanager_storage)
+	commentsmanagercontroller := commentsmanagercontroller.New(a.log, commentsmanager_service)
+
+	// Контроллер для статы
+	statscontroller := statscontroller.New(a.log, articlemanager_service, usersmanager_service, commentsmanager_service)
 
 	// Создание объекта middleware
 	middleware := middleware.New()
@@ -102,8 +106,12 @@ func (a *App) Start() {
 	route_for_user.HandleFunc("/comments", commentsmanagercontroller.Insert).Methods(http.MethodPost)
 	route_for_article_admin.HandleFunc("/comments/{id}", commentsmanagercontroller.Delete).Methods(http.MethodDelete)
 
+	route_for_analyst := r.PathPrefix("/api/v1/stats").Subrouter()
+	route_for_analyst.Use(middleware.ValidateToken)
+	route_for_analyst.HandleFunc("/articles", statscontroller.GetArticlesStats).Methods(http.MethodGet)
+	route_for_analyst.HandleFunc("/users", statscontroller.GetUsersStats).Methods(http.MethodGet)
+
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", a.cfg.API.Port), r); err != nil {
 		panic(err)
 	}
-
 }

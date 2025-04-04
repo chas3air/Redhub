@@ -57,6 +57,10 @@ func (m *Middleware) RequireUserAdmin(next http.Handler) http.Handler {
 	return m.roleMiddleware("user_admin", next)
 }
 
+func (m *Middleware) RequireAnalyst(next http.Handler) http.Handler {
+	return m.roleMiddleware("analyst", next)
+}
+
 func (m *Middleware) RequireArticleAdmin(next http.Handler) http.Handler {
 	return m.roleMiddleware("article_admin", next)
 }
