@@ -5,10 +5,17 @@ import (
 	"apigateway/internal/domain/interfaces/comments"
 	"apigateway/internal/domain/interfaces/users"
 	"apigateway/pkg/lib/logger/sl"
+	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
+	"sort"
 	"time"
+
+	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type StatsController struct {
@@ -31,6 +38,19 @@ func New(log *slog.Logger,
 	}
 }
 
+func (sc *StatsController) handleError(w http.ResponseWriter, err error, log *slog.Logger) {
+	if errors.Is(err, context.Canceled) {
+		log.Error("Request was canceled by the user")
+		http.Error(w, "Request canceled", http.StatusRequestTimeout)
+	} else if errors.Is(err, context.DeadlineExceeded) || status.Code(err) == codes.DeadlineExceeded {
+		log.Error("Request time out")
+		http.Error(w, "Request timeout", http.StatusRequestTimeout)
+	} else {
+		log.Error("Operation failed", sl.Err(err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 // количество статей
 // количество статей пользователя отсортировано по убыванию
 func (sc *StatsController) GetArticlesStats(w http.ResponseWriter, r *http.Request) {
@@ -39,15 +59,39 @@ func (sc *StatsController) GetArticlesStats(w http.ResponseWriter, r *http.Reque
 		"op", op,
 	)
 
+	type OwnerArticle struct {
+		OwnerId         uuid.UUID `json:"owner_id,omitempty"`
+		CountOfArticles int       `json:"count_of_articles,omitempty"`
+	}
+
 	res_struct := struct {
-		CountOfArticles int `json:"count_of_articles,omitempty"`
+		CountOfArticles int            `json:"count_of_articles,omitempty"`
+		OwnerArticles   []OwnerArticle `json:"owner_articles,omitempty"`
 	}{}
 
 	articles, err := sc.articleService.GetArticles(r.Context())
 	if err != nil {
-		// дописать
+		sc.handleError(w, err, log)
 		return
 	}
+
+	ownerStats := make(map[uuid.UUID]int)
+	for _, article := range articles {
+		ownerStats[article.OwnerId]++
+	}
+
+	for owner_id, countOfArticles := range ownerStats {
+		res_struct.OwnerArticles = append(
+			res_struct.OwnerArticles,
+			OwnerArticle{
+				OwnerId:         owner_id,
+				CountOfArticles: countOfArticles,
+			})
+	}
+
+	sort.Slice(res_struct.OwnerArticles, func(i, j int) bool {
+		return res_struct.OwnerArticles[i].CountOfArticles > res_struct.OwnerArticles[j].CountOfArticles
+	})
 
 	res_struct.CountOfArticles = len(articles)
 
@@ -70,7 +114,7 @@ func (sc *StatsController) GetUsersStats(w http.ResponseWriter, r *http.Request)
 
 	users, err := sc.usersService.GetUsers(r.Context())
 	if err != nil {
-		// дописать
+		sc.handleError(w, err, log)
 		return
 	}
 
