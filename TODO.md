@@ -14,6 +14,7 @@ Names of branches:
     13. fix-UAprotos: fix users and articles proto to return obj in insert and update
     14. fix-auth: fix auth, adding access and refresh tokens, maybe add cache
     15. task-web: do web
+    15. task-stats: add statistics to app
 
 
 Tasks:

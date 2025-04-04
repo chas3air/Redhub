@@ -53,3 +53,5 @@ stats.py
 /webnpm-debug.log*
 /webyarn-debug.log*
 /webyarn-error.log*
+
+/web/node_modules
