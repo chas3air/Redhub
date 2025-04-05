@@ -1,7 +1,5 @@
-CREATE DATABASE redhub;
-
-\c redhub;
-
+-- +goose Up
+-- +goose StatementBegin
 CREATE TABLE Users (
     id UUID NOT NULL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -11,12 +9,9 @@ CREATE TABLE Users (
     description TEXT,
     birthday TIMESTAMP WITHOUT TIME ZONE
 );
+-- +goose StatementEnd
 
-CREATE TABLE Articles (
-    id UUID NOT NULL PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    owner_id UUID NOT NULL
-);
-
+-- +goose Down
+-- +goose StatementBegin
+DROP TABLE IF EXISTS Users;
+-- +goose StatementEnd

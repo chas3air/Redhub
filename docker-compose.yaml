@@ -3,7 +3,9 @@ networks:
 
 
 volumes:
-  redhub_volume:
+  redhub_volume_articles:
+  redhub_volume_users:
+  redhub_volume_comments:
 
 
 services:
@@ -52,12 +54,13 @@ services:
     ports:
       - "6001:50051"
     depends_on:
-      - psql
+      psql_users:
+        condition: service_healthy
     environment:
-      - DATABASE_URL=postgres://postgres:123@psql:5432/redhub?sslmode=disable
+      - DATABASE_URL=postgres://postgres:123@psql_users:5432/redhub?sslmode=disable
 
   article_service:
-    build: 
+    build:
       context: ./Core/ArticleManageService
     container_name: article_service
     networks:
@@ -65,9 +68,10 @@ services:
     ports:
       - 6000:50051
     depends_on:
-      - psql
+      psql_articles:
+        condition: service_healthy
     environment:
-      - DATABASE_URL=postgres://postgres:123@psql:5432/redhub?sslmode=disable
+      - DATABASE_URL=postgres://postgres:123@psql_articles:5432/redhub?sslmode=disable
 
   comment_service:
     build: 
@@ -78,19 +82,64 @@ services:
     ports:
       - "6004:50051"
     depends_on:
-      - psql
+      psql_comments:
+        condition: service_healthy
     environment:
-      - DATABASE_URL=postgres://postgres:123@psql:5432/redhub?sslmode=disable
+      - DATABASE_URL=postgres://postgres:123@psql_comments:5432/redhub?sslmode=disable
 
-  psql:
+  psql_articles:
     image: postgres:latest
-    container_name: psql
+    container_name: psql_articles
     ports:
-      - "6002:5432"
+      - "6100:5432"
     networks:
       - work_net
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
+      POSTGRES_DB: redhub
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
     volumes:
-    - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    - redhub_volume:/var/lib/postgresql/data
+    - redhub_volume_articles:/var/lib/postgresql/data
+
+  psql_users:
+    image: postgres:latest
+    container_name: psql_users
+    ports:
+      - "6101:5432"
+    networks:
+      - work_net
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: redhub
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    volumes:
+    - redhub_volume_users:/var/lib/postgresql/data
+
+  psql_comments:
+    image: postgres:latest
+    container_name: psql_comments
+    ports:
+      - "6102:5432"
+    networks:
+      - work_net
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: redhub
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    volumes:
+    - redhub_volume_comments:/var/lib/postgresql/data

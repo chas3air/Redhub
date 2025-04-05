@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
 	"usersManageService/internal/domain/models"
 	"usersManageService/internal/storage"
 	storage_error "usersManageService/internal/storage"
@@ -13,6 +15,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+
+	"github.com/pressly/goose/v3"
 )
 
 type PsqlStorage struct {
@@ -30,10 +34,20 @@ func New(log *slog.Logger, connStr string) *PsqlStorage {
 		panic(err)
 	}
 
+	wd, _ := os.Getwd()
+	migrationPath := filepath.Join(wd, "app", "migrations")
+	if err := applyMigrations(db, migrationPath); err != nil {
+		panic(err)
+	}
+
 	return &PsqlStorage{
 		log: log,
 		DB:  db,
 	}
+}
+
+func applyMigrations(db *sql.DB, migrationsPath string) error {
+	return goose.Up(db, migrationsPath)
 }
 
 func (ps *PsqlStorage) GetUsers(ctx context.Context) ([]models.User, error) {

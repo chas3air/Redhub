@@ -9,8 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
 
 	"github.com/google/uuid"
+	"github.com/pressly/goose/v3"
 
 	"github.com/lib/pq"
 )
@@ -31,10 +34,20 @@ func New(log *slog.Logger, connStr string) *PsqlStorage {
 		panic(err)
 	}
 
+	wd, _ := os.Getwd()
+	migrationPath := filepath.Join(wd, "app", "migrations")
+	if err := applyMigrations(db, migrationPath); err != nil {
+		panic(err)
+	}
+
 	return &PsqlStorage{
 		log: log,
 		DB:  db,
 	}
+}
+
+func applyMigrations(db *sql.DB, migrationsPath string) error {
+	return goose.Up(db, migrationsPath)
 }
 
 func (s *PsqlStorage) Close() {

@@ -9,9 +9,12 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 )
 
 type PsqlStorage struct {
@@ -29,10 +32,20 @@ func New(log *slog.Logger, connStr string) *PsqlStorage {
 		panic(err)
 	}
 
+	wd, _ := os.Getwd()
+	migrationPath := filepath.Join(wd, "app", "migrations")
+	if err := applyMigrations(db, migrationPath); err != nil {
+		panic(err)
+	}
+
 	return &PsqlStorage{
 		log: log,
 		DB:  db,
 	}
+}
+
+func applyMigrations(db *sql.DB, migrationsPath string) error {
+	return goose.Up(db, migrationsPath)
 }
 
 func (p *PsqlStorage) GetCommentById(ctx context.Context, cid uuid.UUID) (models.Comment, error) {
