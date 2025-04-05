@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"usersManageService/internal/domain/models"
-	"usersManageService/internal/storage"
 	storage_error "usersManageService/internal/storage"
 	"usersManageService/pkg/lib/logger/sl"
 
@@ -158,7 +157,7 @@ func (ps *PsqlStorage) Insert(ctx context.Context, user models.User) (models.Use
 	if err != nil {
 		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
 			log.Error("User with this ID already exists", sl.Err(err))
-			return models.User{}, fmt.Errorf("%s: %w", op, storage.ErrAlreadyExists)
+			return models.User{}, fmt.Errorf("%s: %w", op, storage_error.ErrAlreadyExists)
 		}
 
 		log.Error("Error inserting user", sl.Err(err))
@@ -198,7 +197,7 @@ func (ps *PsqlStorage) Update(ctx context.Context, uid uuid.UUID, user models.Us
 
 	if rowsAffected == 0 {
 		log.Error("Zero rows affected")
-		return models.User{}, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
+		return models.User{}, fmt.Errorf("%s: %w", op, storage_error.ErrNotFound)
 	}
 
 	return user, nil
@@ -218,9 +217,9 @@ func (ps *PsqlStorage) Delete(ctx context.Context, uid uuid.UUID) (models.User, 
 
 	user, err := ps.GetUserById(ctx, uid)
 	if err != nil {
-		if errors.Is(err, storage.ErrNotFound) {
+		if errors.Is(err, storage_error.ErrNotFound) {
 			log.Warn("User not found", sl.Err(err))
-			return models.User{}, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
+			return models.User{}, fmt.Errorf("%s: %w", op, storage_error.ErrNotFound)
 		}
 
 		log.Error("Error getting user before deliting", sl.Err(err))
