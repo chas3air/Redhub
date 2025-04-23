@@ -75,7 +75,7 @@ func (s *PsqlStorage) GetArticles(ctx context.Context) ([]models.Article, error)
 	articles := make([]models.Article, 0, 5)
 	for rows.Next() {
 		var article models.Article
-		err := rows.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.OwnerId)
+		err := rows.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.Tag, &article.OwnerId)
 		if err != nil {
 			log.Warn("Error scaning row", sl.Err(err))
 			continue
@@ -98,7 +98,7 @@ func (s *PsqlStorage) GetArticleById(ctx context.Context, aid uuid.UUID) (models
 	`, aid)
 
 	var article models.Article
-	err := row.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.OwnerId)
+	err := row.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.Tag, &article.OwnerId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Warn("Article with current id not found", sl.Err(err))
@@ -131,7 +131,7 @@ func (s *PsqlStorage) GetArticlesByOwnerId(ctx context.Context, uid uuid.UUID) (
 	articles := make([]models.Article, 0, 5)
 	for rows.Next() {
 		var article models.Article
-		err := rows.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.OwnerId)
+		err := rows.Scan(&article.Id, &article.CreatedAt, &article.Title, &article.Content, &article.Tag, &article.OwnerId)
 		if err != nil {
 			log.Warn("Error scaning row", sl.Err(err))
 			continue
@@ -150,9 +150,9 @@ func (s *PsqlStorage) Insert(ctx context.Context, article models.Article) (model
 	)
 
 	_, err := s.DB.ExecContext(ctx, `
-		INSERT INTO `+ArticlesTableName+` (id, created_at, title, content, owner_id)
-		VALUES ($1, $2, $3, $4, $5);
-	`, article.Id, article.CreatedAt, article.Title, article.Content, article.OwnerId)
+		INSERT INTO `+ArticlesTableName+` (id, created_at, title, content, tag, owner_id)
+		VALUES ($1, $2, $3, $4, $5, $6);
+	`, article.Id, article.CreatedAt, article.Title, article.Content, article.Tag, article.OwnerId)
 
 	if err != nil {
 		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
@@ -176,9 +176,10 @@ func (s *PsqlStorage) Update(ctx context.Context, aid uuid.UUID, article models.
 	result, err := s.DB.ExecContext(ctx, `
 		UPDATE `+ArticlesTableName+` SET 
 			title = $1, 
-			content = $2  
-		WHERE id = $3;
-	`, article.Title, article.Content, aid)
+			content = $2,
+			tag = $3
+		WHERE id = $4;
+	`, article.Title, article.Content, article.Tag, aid)
 	if err != nil {
 		log.Error("Error updating article", sl.Err(err))
 		return models.Article{}, fmt.Errorf("%s: %w", op, err)

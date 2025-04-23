@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from 'react-router-dom';
 import logo from '../../../assets/logo512.png';
 
 const RegisterForm = () => {
@@ -7,16 +8,18 @@ const RegisterForm = () => {
     const [password, setPassword] = useState('');
     const [nick, setNick] = useState('');
     const [birthday, setBirthday] = useState('');
+    const [errorMessage, setErrorMessage] = useState(''); // Состояние для хранения сообщения об ошибке
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const data = {
-            id: uuidv4(), // Генерация уникального ID
+            id: uuidv4(),
             email: email,
             password: password,
             nick: nick,
-            birthday: birthday,
+            birthday: new Date(birthday).toISOString(),
         };
 
         try {
@@ -29,11 +32,19 @@ const RegisterForm = () => {
             });
 
             if (!response.ok) {
+                const errorText = await response.text();
+                setErrorMessage(`Ошибка при регистрации: ${errorText}`);
                 throw new Error('Ошибка при регистрации');
             }
 
             const result = await response.json();
-            console.log(result); // Обработайте ответ сервера
+
+            // Предположим, что ваш сервер возвращает { success: true } в случае успешной регистрации
+            if (result.success) {
+                navigate('/profile');
+            } else {
+                setErrorMessage(result.message || 'Неизвестная ошибка');
+            }
         } catch (error) {
             console.error('Ошибка:', error);
         }
@@ -43,6 +54,9 @@ const RegisterForm = () => {
         <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
             <div className="w-50 p-4">
                 <h2 className="mb-4">Регистрация</h2>
+                
+                {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} {/* Сообщение об ошибке */}
+
                 <form onSubmit={handleSubmit} className="border p-4 rounded bg-light">
                     <div className="form-group">
                         <label htmlFor="email">Email:</label>
@@ -80,7 +94,7 @@ const RegisterForm = () => {
                     <div className="form-group">
                         <label htmlFor="birthday">Дата рождения:</label>
                         <input
-                            type="date"
+                            type="datetime-local"
                             id="birthday"
                             className="form-control"
                             value={birthday}

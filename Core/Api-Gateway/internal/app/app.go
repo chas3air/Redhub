@@ -1,6 +1,7 @@
 package app
 
 import (
+	"apigateway/internal/controllers/agreement"
 	articlecontroller "apigateway/internal/controllers/articleController"
 	authcontroller "apigateway/internal/controllers/auth"
 	commentsmanagercontroller "apigateway/internal/controllers/commentController"
@@ -59,6 +60,9 @@ func (a *App) Start() {
 	// Контроллер для статы
 	statscontroller := statscontroller.New(a.log, articlemanager_service, usersmanager_service, commentsmanager_service)
 
+	// Контроллер для модерации
+	moderationController := agreement.New(a.log)
+
 	// Создание объекта middleware
 	middleware := middleware.New()
 
@@ -70,20 +74,21 @@ func (a *App) Start() {
 
 	// Группа для авторизации, не пропускает если пользователь уже существует
 	authRouter := r.PathPrefix("/api/v1").Subrouter()
+	authRouter.Use(middleware.CORS)
 	authRouter.Use(middleware.PreventAccessIfLoggedIn)
 	authRouter.HandleFunc("/login", authcontroller.Login).Methods(http.MethodPost, http.MethodOptions)
-	authRouter.HandleFunc("/register", authcontroller.Register).Methods(http.MethodPost)
+	authRouter.HandleFunc("/register", authcontroller.Register).Methods(http.MethodPost, http.MethodOptions)
 
 	// Группа для работы с пользователями
 	route_for_user_admin := r.PathPrefix("/api/v1/users").Subrouter()
 	route_for_user_admin.Use(middleware.ValidateToken)
 	route_for_user_admin.Use(middleware.RequireUserAdmin)
 
-	r.HandleFunc("/api/v1/users", userscontroller.GetUsers).Methods(http.MethodGet)
-	r.HandleFunc("/api/v1/users/{id}", userscontroller.GetUserById).Methods(http.MethodGet)
-	route_for_user_admin.HandleFunc("", userscontroller.Insert).Methods(http.MethodPost)
-	route_for_user_admin.HandleFunc("/{id}", userscontroller.Update).Methods(http.MethodPut)
-	route_for_user_admin.HandleFunc("/{id}", userscontroller.Delete).Methods(http.MethodDelete)
+	r.HandleFunc("/api/v1/users", userscontroller.GetUsers).Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc("/api/v1/users/{id}", userscontroller.GetUserById).Methods(http.MethodGet, http.MethodOptions)
+	route_for_user_admin.HandleFunc("", userscontroller.Insert).Methods(http.MethodPost, http.MethodOptions)
+	route_for_user_admin.HandleFunc("/{id}", userscontroller.Update).Methods(http.MethodPut, http.MethodOptions)
+	route_for_user_admin.HandleFunc("/{id}", userscontroller.Delete).Methods(http.MethodDelete, http.MethodOptions)
 
 	// Группа для работы с постами и комментариями
 	route_for_article_admin := r.PathPrefix("/api/v1").Subrouter()
@@ -94,22 +99,28 @@ func (a *App) Start() {
 	route_for_user.Use(middleware.ValidateToken)
 	route_for_user.Use(middleware.RequireUser)
 
-	r.HandleFunc("/api/v1/articles", articlecontroller.GetArticles).Methods(http.MethodGet)
-	r.HandleFunc("/api/v1/articles/{article_id}/", articlecontroller.GetArticleById).Methods(http.MethodGet)
-	r.HandleFunc("/api/v1/articles/{owner_id}", articlecontroller.GetArticlesByOwnerId).Methods(http.MethodGet)
-	route_for_user.HandleFunc("/articles", articlecontroller.Insert).Methods(http.MethodPost)
-	route_for_article_admin.HandleFunc("/articles/{article_id}", articlecontroller.Update).Methods(http.MethodPut)
-	route_for_article_admin.HandleFunc("/articles/{article_id}", articlecontroller.Delete).Methods(http.MethodDelete)
+	r.HandleFunc("/api/v1/articles", articlecontroller.GetArticles).Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc("/api/v1/articles/{article_id}/", articlecontroller.GetArticleById).Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc("/api/v1/articles/{owner_id}", articlecontroller.GetArticlesByOwnerId).Methods(http.MethodGet, http.MethodOptions)
+	route_for_user.HandleFunc("/articles", articlecontroller.Insert).Methods(http.MethodPost, http.MethodOptions)
+	route_for_article_admin.HandleFunc("/articles/{article_id}", articlecontroller.Update).Methods(http.MethodPut, http.MethodOptions)
+	route_for_article_admin.HandleFunc("/articles/{article_id}", articlecontroller.Delete).Methods(http.MethodDelete, http.MethodOptions)
 
-	r.HandleFunc("/api/v1/comments/{id}", commentsmanagercontroller.GetCommentById).Methods(http.MethodGet)
-	r.HandleFunc("/api/v1/{article_id}/comments", commentsmanagercontroller.GetCommentsByArticleId).Methods(http.MethodGet)
-	route_for_user.HandleFunc("/comments", commentsmanagercontroller.Insert).Methods(http.MethodPost)
-	route_for_article_admin.HandleFunc("/comments/{id}", commentsmanagercontroller.Delete).Methods(http.MethodDelete)
+	r.HandleFunc("/api/v1/comments/{id}", commentsmanagercontroller.GetCommentById).Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc("/api/v1/{article_id}/comments", commentsmanagercontroller.GetCommentsByArticleId).Methods(http.MethodGet, http.MethodOptions)
+	route_for_user.HandleFunc("/comments", commentsmanagercontroller.Insert).Methods(http.MethodPost, http.MethodOptions)
+	route_for_article_admin.HandleFunc("/comments/{id}", commentsmanagercontroller.Delete).Methods(http.MethodDelete, http.MethodOptions)
 
 	route_for_analyst := r.PathPrefix("/api/v1/stats").Subrouter()
 	route_for_analyst.Use(middleware.ValidateToken)
-	route_for_analyst.HandleFunc("/articles", statscontroller.GetArticlesStats).Methods(http.MethodGet)
-	route_for_analyst.HandleFunc("/users", statscontroller.GetUsersStats).Methods(http.MethodGet)
+	route_for_analyst.HandleFunc("/articles", statscontroller.GetArticlesStats).Methods(http.MethodGet, http.MethodOptions)
+	route_for_analyst.HandleFunc("/users", statscontroller.GetUsersStats).Methods(http.MethodGet, http.MethodOptions)
+
+	// route_for_moderation := r.PathPrefix("/api/v1/moderation").Subrouter()
+	// route_for_moderation.Use(middleware.RequireModerator)
+	r.HandleFunc("/api/v1/moderation/get", moderationController.GetArticles).Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc("/api/v1/moderation/add", moderationController.AddArticle).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/api/v1/moderation/remove", moderationController.RemoveArticle).Methods(http.MethodDelete, http.MethodOptions)
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", a.cfg.API.Port), r); err != nil {
 		panic(err)

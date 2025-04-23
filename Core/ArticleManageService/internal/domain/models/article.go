@@ -8,14 +8,14 @@ import (
 )
 
 type Article struct {
-	Id        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	OwnerId   uuid.UUID `json:"owner_id"`
+	Id        uuid.UUID `json:"id,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	Title     string    `json:"title,omitempty"`
+	Content   string    `json:"content,omitempty"`
+	Tag       string    `json:"tag,omitempty"`
+	OwnerId   uuid.UUID `json:"owner_id,omitempty"`
 }
 
-// String метод для Article
 func (a Article) String() string {
 	return fmt.Sprintf(
 		"Article(ID: %s, CreatedAt: %s, Title: %s, OwnerId: %s)",

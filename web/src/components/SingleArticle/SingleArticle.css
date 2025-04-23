@@ -1,0 +1,31 @@
+.article-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Добавляет отступ между элементами */
+}
+
+.article-tag {
+    display: inline-flex;
+    background-color: blue;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    align-items: center;
+    width: fit-content;
+}
+
+.article-header {
+    display: flex; /* Используем Flexbox для выравнивания элементов в строку */
+    align-items: center; /* Центрируем элементы по вертикали */
+    margin-bottom: 20px; /* Отступ снизу */
+}
+
+.article-image {
+    border-radius: 50%; /* Круглая форма картинки, если нужно */
+    margin-right: 50px; /* Отступ между изображением и ником автора */
+}
+
+.author-nick {
+    margin-right: 50px; /* Отступ между ником автора и датой */
+}

@@ -1,0 +1,16 @@
+.userBlock {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #f9f9f9;
+}
+
+.nick {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.email {
+    color: #555;
+}

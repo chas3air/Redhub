@@ -21,6 +21,7 @@ func ProtoArtToArt(article *amv1.Article) (models.Article, error) {
 		CreatedAt: createdAt,
 		Title:     article.Title,
 		Content:   article.Content,
+		Tag:       article.Tag,
 		OwnerId:   ownerId,
 	}, nil
 }
@@ -33,6 +34,7 @@ func ArtToProtoArt(article models.Article) (*amv1.Article, error) {
 		CreatedAt: createdAt,
 		Title:     article.Title,
 		Content:   article.Content,
+		Tag:       article.Tag,
 		OwnerId:   article.OwnerId.String(),
 	}, nil
 }

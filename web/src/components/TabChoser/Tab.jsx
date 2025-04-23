@@ -13,6 +13,11 @@ export default function TabChoser({active, onChange}) {
                 onClick={() => onChange("profile")}>
                 Profile
             </Button>
+            <Button
+                isActive={active === "users"}
+                onClick={() => onChange("users")}>
+                Users
+            </Button>
         </section>
     );
 }

@@ -65,6 +65,10 @@ func (m *Middleware) RequireArticleAdmin(next http.Handler) http.Handler {
 	return m.roleMiddleware("article_admin", next)
 }
 
+func (m *Middleware) RequireModerator(next http.Handler) http.Handler {
+	return m.roleMiddleware("moderator", next)
+}
+
 func (m *Middleware) roleMiddleware(requiredRole string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims := r.Context().Value("claims").(*models.Claims)
