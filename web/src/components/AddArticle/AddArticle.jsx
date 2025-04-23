@@ -1,28 +1,50 @@
 import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid'; // Импортируем uuid
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+const tagOptions = ['Новости', 'Технология', 'Язык программирования', 'Обзор', 'Реклама'];
 
 const AddArticle = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
+    const [tag, setTag] = useState(tagOptions[0]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const token = localStorage.getItem('token'); // Получаем JWT из localStorage
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Ошибка: JWT токен отсутствует');
+            return;
+        }
+
+        let uid;
+        try {
+            const claims = JSON.parse(atob(token.split('.')[1])); // Декодируем JWT
+            uid = claims.uid; // Берем `uid` из токена
+            if (!uid) throw new Error("UID не найден в токене");
+        } catch (err) {
+            alert(`Ошибка токена: ${err.message}`);
+            return;
+        }
+
         const newArticle = {
-            id: crypto.randomUUID(), // Генерируем случайный UUID
+            id: uuidv4(), // Корректный UUID
             title,
             content,
-            createdAt: new Date().toISOString(),
-            ownerId: crypto.randomUUID(), // Генерируем случайный ownerId (можно заменить)
+            tag,
+            created_at: new Date().toISOString(), // ISO-формат
+            owner_id: uid, // UID пользователя
         };
+
+        console.log(newArticle);
 
         try {
             const response = await fetch('http://localhost:80/api/v1/moderation/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`, // Добавляем токен
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(newArticle),
             });
@@ -34,9 +56,10 @@ const AddArticle = () => {
             alert('Статья успешно добавлена!');
             setTitle('');
             setContent('');
+            setTag(tagOptions[0]);
         } catch (err) {
             console.error(err);
-            alert('Произошла ошибка при добавлении статьи');
+            alert('Ошибка при добавлении статьи');
         }
     };
 
@@ -62,6 +85,18 @@ const AddArticle = () => {
                         onChange={(e) => setContent(e.target.value)} 
                         required 
                     />
+                </div>
+                <div className="mb-3">
+                    <label className="form-label">Категория:</label>
+                    <select 
+                        className="form-control"
+                        value={tag}
+                        onChange={(e) => setTag(e.target.value)}
+                    >
+                        {tagOptions.map(option => (
+                            <option key={option} value={option}>{option}</option>
+                        ))}
+                    </select>
                 </div>
                 <button type="submit" className="btn btn-primary">Сохранить статью</button>
             </form>

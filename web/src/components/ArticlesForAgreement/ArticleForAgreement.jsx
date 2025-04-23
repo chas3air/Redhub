@@ -16,12 +16,14 @@ const AgreementArticles = () => {
         
                 console.log("Отправляем запрос с токеном:", token);
         
-                const response = await fetch('http://localhost:8080/api/v1/moderation/get', {
+                const response = await fetch('http://localhost:80/api/v1/moderation/get', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
                 });
+
+                console.log("Полный ответ сервера:", response); // Выводим Response в консоль
         
                 if (response.status === 401) {
                     throw new Error('Ошибка 401: Недействительный токен или недостаточно прав.');
@@ -32,6 +34,7 @@ const AgreementArticles = () => {
                 }
         
                 const data = await response.json();
+                console.log("Article:", data); // Логируем JSON-ответ сервера
                 setArticles(data);
             } catch (err) {
                 setError(err.message);
@@ -39,7 +42,6 @@ const AgreementArticles = () => {
                 setLoading(false);
             }
         };
-        
 
         fetchArticles();
     }, []);
@@ -54,12 +56,15 @@ const AgreementArticles = () => {
 
             const response = await fetch('http://localhost:80/api/v1/articles', {
                 method: 'POST',
+                mode: "no-cors",
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(article),
             });
+
+            console.log("Полный ответ сервера на добавление статьи:", response); // Логируем ответ
 
             if (!response.ok) {
                 throw new Error('Ошибка при добавлении статьи');
@@ -86,6 +91,8 @@ const AgreementArticles = () => {
                     'Authorization': `Bearer ${token}`,
                 },
             });
+
+            console.log("Полный ответ сервера на удаление статьи:", response); // Логируем ответ
 
             if (!response.ok) {
                 throw new Error('Ошибка при удалении статьи');

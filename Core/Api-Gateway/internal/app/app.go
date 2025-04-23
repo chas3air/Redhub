@@ -106,7 +106,7 @@ func (a *App) Start() {
 	r.HandleFunc("/api/v1/articles", articleController.GetArticles).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc("/api/v1/articles/{article_id}/", articleController.GetArticleById).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc("/api/v1/articles/{owner_id}", articleController.GetArticlesByOwnerId).Methods(http.MethodGet, http.MethodOptions)
-	route_for_user.HandleFunc("/articles", articleController.Insert).Methods(http.MethodPost, http.MethodOptions)
+	// route_for_user.HandleFunc("/articles", articleController.Insert).Methods(http.MethodPost, http.MethodOptions)
 	route_for_article_admin.HandleFunc("/articles/{article_id}", articleController.Update).Methods(http.MethodPut, http.MethodOptions)
 	route_for_article_admin.HandleFunc("/articles/{article_id}", articleController.Delete).Methods(http.MethodDelete, http.MethodOptions)
 
@@ -125,6 +125,7 @@ func (a *App) Start() {
 	r.HandleFunc("/api/v1/moderation/get", moderationController.GetArticles).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc("/api/v1/moderation/add", moderationController.AddArticle).Methods(http.MethodPost, http.MethodOptions)
 	r.HandleFunc("/api/v1/moderation/remove", moderationController.RemoveArticle).Methods(http.MethodDelete, http.MethodOptions)
+	r.HandleFunc("/api/v1/articles", articleController.Insert).Methods(http.MethodPost, http.MethodOptions)
 
 	route_for_favorites := r.PathPrefix("/api/v1/favorites").Subrouter()
 	route_for_favorites.Use(middleware.ValidateToken)
