@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Article from '../Article/Article';
+import './ShowingArticles.css';
 
 const ShowingArticles = () => {
     const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedTag, setSelectedTag] = useState(''); // Состояние для выбранного тега
+    const [selectedTag, setSelectedTag] = useState('');
 
     const tagOptions = ['Все', 'Новости', 'Технология', 'Язык программирования', 'Обзор', 'Реклама'];
 
@@ -19,7 +20,12 @@ const ShowingArticles = () => {
                     throw new Error('Ошибка при получении статей');
                 }
                 const data = await response.json();
-                setArticles(data);
+                console.log("Полученные статьи:", data); // Проверяем данные
+                if (Array.isArray(data)) {
+                    setArticles(data);
+                } else {
+                    throw new Error("Неверный формат данных: ожидался массив");
+                }
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -38,11 +44,10 @@ const ShowingArticles = () => {
         return <div>Ошибка: {error}</div>;
     }
 
-    const filteredArticles = articles.filter(article =>
+    const filteredArticles = Array.isArray(articles) ? articles.filter(article =>
         article.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (selectedTag === 'Все' || !selectedTag || article.tag?.toLowerCase() === selectedTag.toLowerCase())
-    );
-      
+    ) : [];
 
     return (
         <div>
@@ -68,7 +73,11 @@ const ShowingArticles = () => {
             </select>
 
             {filteredArticles.map(article => (
-                <Article key={article.id} article={article} />
+                <div key={article.id} className="article-container">
+                    <div className="article-content">
+                        <Article article={article} />
+                    </div>
+                </div>
             ))}
         </div>
     );

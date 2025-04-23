@@ -1,0 +1,21 @@
+.article-container {
+    display: flex;
+    align-items: stretch;
+    margin: 10px;
+}
+
+.article-content {
+    flex: 1;
+}
+
+.favorite-button-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+}
+
+.add-favorite-button {
+    width: 100%;
+    height: 100%;
+}

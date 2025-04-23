@@ -17,6 +17,7 @@ import ListArticles from './components/ListArticles/ListArticles';
 import ArticlesStats from './components/Stats/ArticleStats/ArticlesStats';
 import UsersStats from './components/Stats/UsersStats/UsersStats';
 import AgreementArticles from './components/ArticlesForAgreement/ArticleForAgreement';
+import Favorites from './components/Favorites/Favorites';
 
 export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -69,11 +70,11 @@ export default function App() {
                             path="/add-article" 
                             element={<PrivateRoute element={<AddArticle />} isAuthenticated={isAuthenticated} />} 
                         />
-                        <Route 
+                        <Route
                             path="/users" 
                             element={<PrivateRoute element={<ListUsers />} isAuthenticated={isAuthenticated} userRole={userRole} requiredRole="user_admin" />} 
                         />
-                        <Route 
+                        <Route
                             path="/articles-edited" 
                             element={<PrivateRoute element={<ListArticles />} isAuthenticated={isAuthenticated} userRole={userRole} requiredRole="article_admin" />} 
                         />
@@ -81,6 +82,7 @@ export default function App() {
                             path="/moderation" 
                             element={<AgreementArticles />} 
                         />
+                        <Route path="/favorites" element={<PrivateRoute element={<Favorites />} isAuthenticated={isAuthenticated} />} />
                         <Route path="/articles/:article_id" element={<SingleArticle />} /> 
                         <Route path="/stats/articles" element={<ArticlesStats />} />
                         <Route path="/stats/users" element={<UsersStats />} />

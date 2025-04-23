@@ -1,4 +1,12 @@
+.articleContainer {
+    display: flex;
+    align-items: stretch;
+    margin: 10px;
+}
+
 .block {
+    position: relative; /* Позволяет позиционировать кнопку внутри блока */
+    flex: 1;
     display: flex;
     flex-direction: column;
     color: black;
@@ -13,11 +21,11 @@
     display: flex;
     justify-content: left;
     align-items: center;
-    margin-bottom: 10px; /* Отступ снизу для разделения с заголовком */
+    margin-bottom: 10px;
 }
 
 h2 {
-    margin: 0; /* Убираем отступы у заголовка */
+    margin: 0;
 }
 
 p {
@@ -25,13 +33,34 @@ p {
 }
 
 .tag {
-    display: inline-flex;  /* Гибкий контейнер, адаптирующийся к размеру текста */
-    background-color: blue; /* Синий фон */
-    color: white;           /* Белый текст */
-    padding: 5px 10px;     /* Отступы */
-    border-radius: 5px;    /* Закругленные углы */
-    margin-top: 10px;      /* Отступ сверху */
-    font-size: 0.9em;      /* Размер шрифта */
-    align-items: center;   /* Выравнивание текста по центру */
-    width: fit-content;    /* Ширина адаптируется под содержимое */
+    display: inline-flex;
+    background-color: blue;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 0.9em;
+    align-items: center;
+    width: fit-content;
+}
+
+/* Стиль для кнопки в верхнем правом углу */
+.favoriteButtonContainer {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.addFavoriteButton {
+    width: 25px;
+    height: 25px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 50%; /* Делаем кнопку круглой */
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
