@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Article({ article }) {
     const [ownerNick, setOwnerNick] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -34,19 +36,19 @@ export default function Article({ article }) {
     };
 
     const addToFavorites = async () => {
-        const token = localStorage.getItem('token'); // Получаем JWT токен
+        const token = localStorage.getItem('token');
         if (!token) {
-            alert('Ошибка: JWT токен отсутствует');
+            setErrorMessage('Ошибка: сначала зарегистрируйтесь.');
             return;
         }
 
         let uid;
         try {
-            const claims = JSON.parse(atob(token.split('.')[1])); // Декодируем токен
-            uid = claims.uid; // Извлекаем `uid`
+            const claims = JSON.parse(atob(token.split('.')[1]));
+            uid = claims.uid;
             if (!uid) throw new Error("UID не найден в токене");
         } catch (err) {
-            alert(`Ошибка при обработке токена: ${err.message}`);
+            setErrorMessage(`Ошибка при обработке токена: ${err.message}`);
             return;
         }
 
@@ -57,21 +59,33 @@ export default function Article({ article }) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(article), // Отправляем весь объект статьи
+                body: JSON.stringify(article),
             });
 
             if (!response.ok) {
                 throw new Error('Ошибка при добавлении в избранное');
             }
 
-            alert('Статья добавлена в избранное!');
+            setSuccessMessage('Статья добавлена в избранное!');
+            setErrorMessage(''); // Сброс сообщения об ошибке
         } catch (err) {
-            alert(`Ошибка: ${err.message}`);
+            setErrorMessage(`Ошибка: ${err.message}`);
+            setSuccessMessage(''); // Сброс сообщения об успехе
         }
     };
 
     return (
         <div className={styles.block}>
+            {errorMessage && (
+                <div className={styles.errorMessage}>
+                    {errorMessage}
+                </div>
+            )}
+            {successMessage && (
+                <div className={styles.successMessage}>
+                    {successMessage}
+                </div>
+            )}
             <div className={styles.favoriteButtonContainer}>
                 <button className={styles.addFavoriteButton} onClick={addToFavorites}>★</button>
             </div>

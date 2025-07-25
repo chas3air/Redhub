@@ -1,0 +1,37 @@
+.stats-container {
+    background-color: #222;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.loading, .error {
+    font-size: 18px;
+    color: red;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.ranking-table th, .ranking-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.ranking-table th {
+    background-color: #FF0000;
+    color: white;
+}
+
+.ranking-table tr:nth-child(even) {
+    background-color: #444;
+}
+
+.ranking-table tr:hover {
+    background-color: #555;
+}

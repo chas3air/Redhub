@@ -66,34 +66,43 @@ export default function SingleArticle() {
 
     const handleCommentSubmit = async (event) => {
         event.preventDefault();
-
         const token = localStorage.getItem('token');
-        const newCommentData = {
-            article_id: article_id,
-            owner_id: "вставьте_id_владельца_из_token",
-            created_at: new Date().toISOString(),
-            content: newComment,
-        };
+        let uid;
+        try {
+            const claims = JSON.parse(atob(token.split('.')[1]));
+            uid = claims.uid;
+            if (!uid) throw new Error("UID не найден в токене");
+        } catch (err) {
+            alert(`Ошибка при обработке токена: ${err.message}`);
+            return;
+        }
 
         try {
-            const response = await fetch('http://localhost:80/api/v1/comments', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(newCommentData),
-            });
+            const response = await fetch(`http://localhost:80/api/v1/users/${uid}`);
+            const data = await response.json();
 
             if (!response.ok) {
-                throw new Error('Ошибка при отправке комментария');
+                throw new Error('Ошибка при получении пользователя');
             }
 
-            const result = await response.json();
-            setComments([...comments, result]);
+            const currentDate = new Date().toLocaleString('ru-RU', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const newCommentData = {
+                owner_id: data.nick, // Используем ник вместо ID
+                created_at: currentDate,
+                content: newComment,
+            };
+
+            setComments(prevComments => [...prevComments, newCommentData]);
             setNewComment('');
         } catch (error) {
-            console.error('Ошибка при отправке комментария:', error);
+            console.error('Ошибка при получении пользователя:', error);
         }
     };
 
@@ -123,29 +132,36 @@ export default function SingleArticle() {
             
             <div>{article.content}</div>
 
+            <h3>Добавить комментарий</h3>
+            <form onSubmit={handleCommentSubmit} className="comment-form">
+                <div className="comment-input-container">
+                    <textarea 
+                        value={newComment}
+                        onChange={handleCommentChange}
+                        placeholder="Введите ваш комментарий..."
+                        required
+                        className="comment-input"
+                    />
+                    <button type="submit" className="submit-button">Отправить</button>
+                </div>
+            </form>
+
             <h3>Комментарии</h3>
             {comments.length === 0 ? (
                 <p>Нет комментариев к этой статье.</p>
             ) : (
-                <ul>
-                    {comments.map(comment => (
-                        <li key={comment.id}>
-                            <strong>{comment.owner_id}</strong>: {comment.content}
-                        </li>
+                <div className="comments-container">
+                    {comments.map((comment, index) => (
+                        <div key={index} className="comment-block" style={{ border: '1px solid #ccc', borderRadius: '5px', padding: '10px', marginBottom: '10px' }}>
+                            <div className="comment-header">
+                                <strong>{comment.owner_id || 'Аноним'}</strong>
+                                <span className="comment-date" style={{ marginLeft: '10px' }}>{comment.created_at}</span>
+                            </div>
+                            <div className="comment-content">{comment.content}</div>
+                        </div>
                     ))}
-                </ul>
+                </div>
             )}
-
-            <form onSubmit={handleCommentSubmit}>
-                <textarea 
-                    value={newComment}
-                    onChange={handleCommentChange}
-                    placeholder="Введите ваш комментарий..."
-                    required
-                />
-                <br />
-                <button type="submit">Отправить</button>
-            </form>
         </div>
     );
 }

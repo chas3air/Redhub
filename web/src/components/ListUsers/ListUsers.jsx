@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import User from '../User/User';
+import './ListUsers.css';
 
 const ListUsers = () => {
     const [users, setUsers] = useState([]);
@@ -22,7 +22,7 @@ const ListUsers = () => {
             }
         };
 
-        fetchUsers(); 
+        fetchUsers();
     }, []);
 
     const handleDeleteUser = async (userId) => {
@@ -38,7 +38,7 @@ const ListUsers = () => {
             if (!response.ok) {
                 throw new Error('Ошибка при удалении пользователя');
             }
-            setUsers(users.filter(user => user.id !== userId)); // Обновляем состояние
+            setUsers(users.filter(user => user.id !== userId));
         } catch (err) {
             console.error(err.message);
         }
@@ -55,9 +55,35 @@ const ListUsers = () => {
     return (
         <div>
             <h1>Пользователи</h1>
-            {users.map(user => (
-                <User key={user.id} user={user} onDelete={handleDeleteUser} /> // Передаем функцию удаления
-            ))}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Имя</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {users.map(user => (
+                        <tr key={user.id}>
+                            <td>{user.id}</td>
+                            <td>{user.nick}</td>
+                            <td>{user.email}</td>
+                            <td>{user.role}</td>
+                            <td>
+                                <button 
+                                    className="btn btn-danger" 
+                                    onClick={() => handleDeleteUser(user.id)}
+                                >
+                                    Удалить
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };

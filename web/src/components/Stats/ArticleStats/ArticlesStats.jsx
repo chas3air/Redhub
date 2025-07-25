@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
+    PieChart,
+    Pie,
+    Cell,
     Tooltip,
     Legend,
     ResponsiveContainer,
 } from 'recharts';
+import './ArticlesStats.css';
 
 const ArticlesStats = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const COLORS = ["#FF0000", "#000000", "#FFFFFF"]; // Красный, черный, белый
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem('token'); // Получаем токен из локального хранилища
+                const token = localStorage.getItem('token');
                 const response = await fetch('http://localhost:80/api/v1/stats/articles', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`, // Добавляем токен в заголовок
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -31,11 +32,14 @@ const ArticlesStats = () => {
                 }
 
                 const result = await response.json();
-                const formattedData = result.owner_articles.map(owner => ({
-                    name: owner.owner_id,
+                const formattedData = result.owner_articles.map((owner, index) => ({
+                    name: `Пользователь ${owner.owner_id.substring(0, 6)}`,
                     count: owner.count_of_articles,
+                    color: COLORS[index % COLORS.length],
                 }));
-                setData(formattedData);
+
+                const sortedData = [...formattedData].sort((a, b) => b.count - a.count);
+                setData(sortedData);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -47,25 +51,55 @@ const ArticlesStats = () => {
     }, []);
 
     if (loading) {
-        return <div>Загрузка данных...</div>;
+        return <div className="loading">Загрузка данных...</div>;
     }
 
     if (error) {
-        return <div>Ошибка: {error}</div>;
+        return <div className="error">Ошибка: {error}</div>;
     }
 
     return (
-        <div style={{ width: '100%', height: 400 }}>
-            <h2>Статистика статей по владельцам</h2>
-            <ResponsiveContainer>
-                <BarChart data={data}>
-                    <XAxis dataKey="name" />
-                    <YAxis />
+        <div className="stats-container">
+            <h2>📊 Статистика статей по владельцам</h2>
+            <ResponsiveContainer width="100%" height={400}>
+                <PieChart>
+                    <Pie
+                        data={data}
+                        dataKey="count"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={150}
+                        label
+                    >
+                        {data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                    </Pie>
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="count" fill="#8884d8" />
-                </BarChart>
+                </PieChart>
             </ResponsiveContainer>
+
+            <h3>🏆 Рейтинг владельцев статей</h3>
+            <table className="ranking-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Владелец</th>
+                        <th>Количество статей</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {data.map((owner, index) => (
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{owner.name}</td>
+                            <td>{owner.count}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };

@@ -23,7 +23,7 @@ const AgreementArticles = () => {
                     },
                 });
 
-                console.log("Полный ответ сервера:", response); // Выводим Response в консоль
+                console.log("Полный ответ сервера:", response);
         
                 if (response.status === 401) {
                     throw new Error('Ошибка 401: Недействительный токен или недостаточно прав.');
@@ -34,7 +34,7 @@ const AgreementArticles = () => {
                 }
         
                 const data = await response.json();
-                console.log("Article:", data); // Логируем JSON-ответ сервера
+                console.log("Article:", data);
                 setArticles(data);
             } catch (err) {
                 setError(err.message);
@@ -64,7 +64,7 @@ const AgreementArticles = () => {
                 body: JSON.stringify(article),
             });
 
-            console.log("Полный ответ сервера на добавление статьи:", response); // Логируем ответ
+            console.log("Полный ответ сервера на добавление статьи:", response);
 
             if (!response.ok) {
                 throw new Error('Ошибка при добавлении статьи');
@@ -73,7 +73,7 @@ const AgreementArticles = () => {
             alert('Статья успешно добавлена!');
         } catch (err) {
             console.error(err);
-            alert('Произошла ошибка при добавлении статьи');
+            // alert('Произошла ошибка при добавлении статьи');
         }
     };
 
@@ -92,7 +92,7 @@ const AgreementArticles = () => {
                 },
             });
 
-            console.log("Полный ответ сервера на удаление статьи:", response); // Логируем ответ
+            console.log("Полный ответ сервера на удаление статьи:", response);
 
             if (!response.ok) {
                 throw new Error('Ошибка при удалении статьи');

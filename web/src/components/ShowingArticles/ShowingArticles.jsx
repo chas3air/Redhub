@@ -9,6 +9,7 @@ const ShowingArticles = () => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTag, setSelectedTag] = useState('');
+    const [infoMessage, setInfoMessage] = useState('');
 
     const tagOptions = ['Все', 'Новости', 'Технология', 'Язык программирования', 'Обзор', 'Реклама'];
 
@@ -20,7 +21,7 @@ const ShowingArticles = () => {
                     throw new Error('Ошибка при получении статей');
                 }
                 const data = await response.json();
-                console.log("Полученные статьи:", data); // Проверяем данные
+                console.log("Полученные статьи:", data);
                 if (Array.isArray(data)) {
                     setArticles(data);
                 } else {
@@ -35,6 +36,15 @@ const ShowingArticles = () => {
 
         fetchArticles();
     }, []);
+
+    const handleAddArticleClick = () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setInfoMessage('Пожалуйста, зарегистрируйтесь или войдите, чтобы добавить статью.');
+        } else {
+            setInfoMessage('');
+        }
+    };
 
     if (loading) {
         return <div>Загрузка статей...</div>;
@@ -52,7 +62,15 @@ const ShowingArticles = () => {
     return (
         <div>
             <h1>Статьи</h1>
-            <Link to="/add-article" className="btn btn-primary mb-3">Добавить статью</Link>
+            <Link 
+                to="/add-article" 
+                className="btn btn-primary mb-3" 
+                onClick={handleAddArticleClick}
+            >
+                Добавить статью
+            </Link>
+
+            {infoMessage && <div className="alert alert-info">{infoMessage}</div>}
 
             <input
                 type="text"

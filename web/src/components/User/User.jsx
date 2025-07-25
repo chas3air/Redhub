@@ -1,6 +1,6 @@
 import styles from './User.module.css';
 
-export default function User({ user, onDelete }) { // Добавляем prop onDelete
+export default function User({ user, onDelete }) {
     return (
         <div key={user.id} className={styles.userBlock}>
             <div className={styles.info}>

@@ -1,61 +1,53 @@
-/* Общие стили для приложения */
-html, body {
-    height: 100%; /* Обеспечим 100% высоты для html и body */
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-#app {
-    flex: 1; /* Главный контейнер занимает все доступное пространство */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start; /* Контент по умолчанию вверху */
-}
-
-/* Стили для профиля */
 .profile {
-    max-width: 70%; /* Установка максимальной ширины на 70% от ширины экрана */
-    margin: 20px auto; /* Автоматический верхний и нижний отступ, центрирование по горизонтали */
-    margin-left: 50px; /* Установка отступа слева */
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px; 
+    margin: auto;
+    padding: 30px; 
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 30px; 
+    font-size: 2.5rem; 
+    color: #333;
+}
+
+.photoContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px; 
 }
 
 .photo {
-    display: flex;
-    align-items: center;
-}
-
-.photo img {
-    width: 300px;
-    height: 300px;
     border-radius: 50%;
-    margin-right: 20px;
+    width: 120px; 
+    height: 120px;
+    object-fit: cover;
+    margin-right: 30px; 
+    border: 3px solid #007bff; 
 }
 
 .loginBlock {
-    display: flex;
-    flex-direction: column;
+    flex-grow: 1;
 }
 
-.loginBlock h2 {
-    margin: 0;
-    font-size: 1.5em;
+.email, .nick {
+    font-size: 1.5rem; 
+    margin: 5px 0; 
 }
 
-.loginBlock p {
-    margin: 5px 0;
-}
-
-/* Стили для футера */
-.footer {
-    background-color: #333;
-    color: white;
+.button {
+    display: block;
+    width: 100%;
     text-align: center;
-    padding: 15px 0;
-    position: relative; /* Убедитесь, что футер следует за контентом */
+    padding: 15px; 
+    font-size: 1.2rem; 
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #0056b3; 
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid'; // Импортируем uuid
+import { v4 as uuidv4 } from 'uuid';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const tagOptions = ['Новости', 'Технология', 'Язык программирования', 'Обзор', 'Реклама'];
@@ -20,8 +20,8 @@ const AddArticle = () => {
 
         let uid;
         try {
-            const claims = JSON.parse(atob(token.split('.')[1])); // Декодируем JWT
-            uid = claims.uid; // Берем `uid` из токена
+            const claims = JSON.parse(atob(token.split('.')[1]));
+            uid = claims.uid;
             if (!uid) throw new Error("UID не найден в токене");
         } catch (err) {
             alert(`Ошибка токена: ${err.message}`);
@@ -29,12 +29,12 @@ const AddArticle = () => {
         }
 
         const newArticle = {
-            id: uuidv4(), // Корректный UUID
+            id: uuidv4(),
             title,
             content,
             tag,
-            created_at: new Date().toISOString(), // ISO-формат
-            owner_id: uid, // UID пользователя
+            created_at: new Date().toISOString(),
+            owner_id: uid,
         };
 
         console.log(newArticle);

@@ -117,6 +117,7 @@ func (a *App) Start() {
 
 	route_for_analyst := r.PathPrefix("/api/v1/stats").Subrouter()
 	route_for_analyst.Use(middleware.ValidateToken)
+	route_for_analyst.Use(middleware.RequireAnalyst)
 	route_for_analyst.HandleFunc("/articles", statsController.GetArticlesStats).Methods(http.MethodGet, http.MethodOptions)
 	route_for_analyst.HandleFunc("/users", statsController.GetUsersStats).Methods(http.MethodGet, http.MethodOptions)
 

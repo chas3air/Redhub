@@ -17,8 +17,8 @@ export default function Favorites() {
 
         let uid;
         try {
-            const claims = JSON.parse(atob(token.split('.')[1])); // Декодируем токен
-            uid = claims.uid; // Получаем `uid`
+            const claims = JSON.parse(atob(token.split('.')[1]));
+            uid = claims.uid;
             if (!uid) throw new Error("UID не найден в токене");
         } catch (err) {
             setError(`Ошибка при обработке токена: ${err.message}`);

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from './../../../assets/logo512.png';
+import logo from './../../../assets/redhub_logo.png';
 
 const LoginForm = ({ onLoginSuccess }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -31,20 +32,27 @@ const LoginForm = ({ onLoginSuccess }) => {
             const token = await response.text();
             localStorage.setItem('token', token);
             
-            // Вызываем функцию успеха входа с токеном
             onLoginSuccess(token);
-
-            // Перенаправление на профиль
             navigate('/profile');
         } catch (error) {
+            setErrorMessage('Что-то пошло не так'); // Устанавливаем сообщение об ошибке
             console.error('Ошибка:', error);
         }
+    };
+
+    const handleRegisterRedirect = () => {
+        navigate('/register'); // Переход на страницу регистрации
     };
 
     return (
         <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
             <div className="w-50 p-4">
                 <h2 className="mb-4">Вход</h2>
+                {errorMessage && (
+                    <div className="alert alert-danger" role="alert">
+                        {errorMessage}
+                    </div>
+                )}
                 <form onSubmit={handleSubmit} className="border p-4 rounded bg-light">
                     <div className="form-group">
                         <label htmlFor="email">Email:</label>
@@ -70,6 +78,12 @@ const LoginForm = ({ onLoginSuccess }) => {
                     </div>
                     <button type="submit" className="btn btn-primary">Войти</button>
                 </form>
+                <button 
+                    onClick={handleRegisterRedirect} 
+                    className="btn btn-link mt-3"
+                >
+                    Нет аккаунта? Зарегистрироваться
+                </button>
             </div>
             <div className="w-50">
                 <img src={logo} alt="Logo" className="img-fluid" style={{ height: '100%', objectFit: 'cover' }} />

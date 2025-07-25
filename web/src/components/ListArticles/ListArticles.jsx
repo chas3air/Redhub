@@ -32,12 +32,12 @@ const ListArticles = () => {
 
     const handleDeleteArticle = async (articleId) => {
         try {
-            const token = localStorage.getItem('token'); // Получаем токен из локального хранилища
+            const token = localStorage.getItem('token');
 
             const response = await fetch(`http://localhost:80/api/v1/articles/${articleId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${token}`, // Добавляем токен в заголовки
+                    'Authorization': `Bearer ${token}`,
                 },
             });
             if (!response.ok) {
@@ -61,13 +61,12 @@ const ListArticles = () => {
         if (!currentArticle) return;
 
         try {
-            const token = localStorage.getItem('token'); // Получаем токен из локального хранилища
-            console.log(token);
+            const token = localStorage.getItem('token');
             const response = await fetch(`http://localhost:80/api/v1/articles/${currentArticle.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`, // Добавляем токен в заголовки
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     title: updatedTitle,
@@ -128,6 +127,7 @@ const ListArticles = () => {
                                 type="text" 
                                 value={updatedTitle} 
                                 onChange={(e) => setUpdatedTitle(e.target.value)} 
+                                className="modal-input"
                             />
                         </div>
                         <div>
@@ -135,14 +135,17 @@ const ListArticles = () => {
                             <textarea 
                                 value={updatedContent} 
                                 onChange={(e) => setUpdatedContent(e.target.value)} 
+                                className="modal-textarea"
                             />
                         </div>
-                        <button className="btn btn-primary" onClick={handleUpdateArticle}>
-                            Сохранить
-                        </button>
-                        <button className="btn btn-secondary" onClick={() => setIsEditing(false)}>
-                            Отмена
-                        </button>
+                        <div className="modal-buttons">
+                            <button className="btn btn-primary" onClick={handleUpdateArticle}>
+                                Сохранить
+                            </button>
+                            <button className="btn btn-secondary" onClick={() => setIsEditing(false)}>
+                                Отмена
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -64,7 +64,10 @@ export default function App() {
                             path="/login" 
                             element={<RedirectIfAuthenticated isAuthenticated={isAuthenticated} element={<LoginForm onLoginSuccess={handleLoginSuccess} />} />} 
                         />
-                        <Route path="/profile" element={<Profile />} />
+                        <Route 
+                            path="/profile" 
+                            element={<PrivateRoute element={<Profile />} isAuthenticated={isAuthenticated} />} 
+                        />
                         <Route path="/articles" element={<ShowingArticles />} />
                         <Route 
                             path="/add-article" 
@@ -84,8 +87,15 @@ export default function App() {
                         />
                         <Route path="/favorites" element={<PrivateRoute element={<Favorites />} isAuthenticated={isAuthenticated} />} />
                         <Route path="/articles/:article_id" element={<SingleArticle />} /> 
-                        <Route path="/stats/articles" element={<ArticlesStats />} />
-                        <Route path="/stats/users" element={<UsersStats />} />
+                        <Route
+                            path="/stats/articles"
+                            element={<PrivateRoute element={<ArticlesStats />} isAuthenticated={isAuthenticated} userRole={userRole} requiredRole="analyst" />} 
+                        />
+                        <Route
+                            path="/stats/users"
+                            element={<PrivateRoute element={<UsersStats />} isAuthenticated={isAuthenticated} userRole={userRole} requiredRole="analyst" />} 
+                        />
+
                         <Route path="*" element={<Navigate to="/login" />} />
                     </Routes>
                 </main>

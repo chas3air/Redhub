@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../../assets/logo512.png';
+import logo from '../../../assets/redhub_logo.png';
 
 const RegisterForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [nick, setNick] = useState('');
     const [birthday, setBirthday] = useState('');
-    const [errorMessage, setErrorMessage] = useState(''); // Состояние для хранения сообщения об ошибке
+    const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -39,7 +39,6 @@ const RegisterForm = () => {
 
             const result = await response.json();
 
-            // Предположим, что ваш сервер возвращает { success: true } в случае успешной регистрации
             if (result.success) {
                 navigate('/profile');
             } else {
@@ -50,12 +49,16 @@ const RegisterForm = () => {
         }
     };
 
+    const handleLoginRedirect = () => {
+        navigate('/login');
+    };
+
     return (
         <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
             <div className="w-50 p-4">
                 <h2 className="mb-4">Регистрация</h2>
                 
-                {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} {/* Сообщение об ошибке */}
+                {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
 
                 <form onSubmit={handleSubmit} className="border p-4 rounded bg-light">
                     <div className="form-group">
@@ -104,6 +107,12 @@ const RegisterForm = () => {
                     </div>
                     <button type="submit" className="btn btn-primary mt-3">Зарегистрироваться</button>
                 </form>
+                <button 
+                    onClick={handleLoginRedirect} 
+                    className="btn btn-link mt-3"
+                >
+                    У вас уже есть аккаунт? Войти
+                </button>
             </div>
             <div className="w-50 d-flex justify-content-center align-items-center">
                 <img src={logo} alt="Logo" style={{ width: '400px', height: 'auto' }} />
